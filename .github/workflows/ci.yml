@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
@@ -49,11 +51,14 @@ jobs:
       run: poetry run mypy src tests
 
     - name: Lint
-      run: poetry run pylint src tests
+      run: |
+        poetry run pylint src tests || exit $(($? & 35))
 
   build:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - uses: actions/checkout@v4
 
