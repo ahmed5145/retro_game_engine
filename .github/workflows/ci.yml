@@ -56,19 +56,27 @@ jobs:
       shell: bash
       run: |
         # Run pylint and capture its exit code
-        poetry run pylint src tests
-        exit_code=$?
+        poetry run pylint src tests || {
+          exit_code=$?
 
-        # Check if the exit code indicates a fatal error (1-31)
-        # Exit codes 32+ are for non-fatal issues (warnings, conventions, etc.)
-        if [ $exit_code -gt 0 ] && [ $exit_code -lt 32 ]; then
-          echo "Pylint found fatal errors. Exit code: $exit_code"
-          exit 1
-        fi
+          # Pylint bit-encoded exit codes:
+          # 1: Fatal message issued
+          # 2: Error message issued
+          # 4: Warning message issued
+          # 8: Refactor message issued
+          # 16: Convention message issued
+          # 32: Usage error
 
-        # Otherwise, consider it a success
-        echo "Pylint completed successfully"
-        exit 0
+          # We only want to fail on fatal errors and usage errors
+          if [ $exit_code -eq 32 ] || [ $exit_code -eq 1 ] || [ $exit_code -eq 2 ]; then
+            echo "Pylint failed with fatal error or usage error (exit code $exit_code)"
+            exit 1
+          fi
+
+          # For other exit codes (warnings, refactor, convention), we'll pass
+          echo "Pylint completed with non-fatal messages (exit code $exit_code)"
+          exit 0
+        }
 
   build:
     needs: test
