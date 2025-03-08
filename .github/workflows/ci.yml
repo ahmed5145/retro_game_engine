@@ -55,9 +55,19 @@ jobs:
       continue-on-error: ${{ matrix.python-version == '3.12' }}  # Temporarily allow 3.12 to fail
       shell: bash
       run: |
-        # Run pylint and check exit code
-        poetry run pylint src tests || code=$?
-        if [ "${code:-0}" -lt 32 ]; then exit 1; fi
+        # Run pylint and capture its exit code
+        poetry run pylint src tests
+        exit_code=$?
+
+        # Check if the exit code indicates a fatal error (1-31)
+        # Exit codes 32+ are for non-fatal issues (warnings, conventions, etc.)
+        if [ $exit_code -gt 0 ] && [ $exit_code -lt 32 ]; then
+          echo "Pylint found fatal errors. Exit code: $exit_code"
+          exit 1
+        fi
+
+        # Otherwise, consider it a success
+        echo "Pylint completed successfully"
         exit 0
 
   build:
