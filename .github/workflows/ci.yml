@@ -53,9 +53,12 @@ jobs:
 
     - name: Lint
       continue-on-error: ${{ matrix.python-version == '3.12' }}  # Temporarily allow 3.12 to fail
+      shell: bash
       run: |
-        # Only fail on errors (score < 5), ignore if score >= 5
-        poetry run pylint src tests || [[ $? -lt 32 ]]
+        # Run pylint and check exit code
+        poetry run pylint src tests || code=$?
+        if [ "${code:-0}" -lt 32 ]; then exit 1; fi
+        exit 0
 
   build:
     needs: test
@@ -81,7 +84,7 @@ jobs:
       run: poetry build
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
