@@ -1,0 +1,21 @@
+[MASTER]
+# Add the src directory to the Python path
+init-hook='import sys; sys.path.append(".")'
+
+[MESSAGES CONTROL]
+# Disable specific warnings
+disable=C0111,  # missing-docstring
+        C0103,  # invalid-name
+        W0611,  # unused-import
+        E1101,  # no-member (for pygame attributes)
+        C0301   # line-too-long
+
+[FORMAT]
+max-line-length=88  # Match black's default
+
+[BASIC]
+good-names=i,j,k,ex,Run,_,x,y,dx,dy,id
+
+[TYPECHECK]
+# List of module names for which member attributes should not be checked
+ignored-modules=pygame 
