@@ -1,17 +1,20 @@
 """Audio management system for handling sound effects and music."""
 from typing import Dict, Optional
+
 import pygame
+
 from .audio_clip import AudioClip, AudioConfig
+
 
 class AudioManager:
     """Manages audio playback and channel allocation."""
 
     def __init__(self, num_channels: int = 8) -> None:
         """Initialize the audio manager.
-        
+
         Args:
             num_channels: Number of audio channels to allocate (default: 8)
-            
+
         Raises:
             pygame.error: If pygame.mixer cannot be initialized
         """
@@ -34,14 +37,16 @@ class AudioManager:
         # Current background music
         self._current_music: Optional[AudioClip] = None
 
-    def load_clip(self, name: str, path: str, config: Optional[AudioConfig] = None) -> None:
+    def load_clip(
+        self, name: str, path: str, config: Optional[AudioConfig] = None
+    ) -> None:
         """Load an audio clip.
-        
+
         Args:
             name: Name to reference the clip by
             path: Path to the audio file
             config: Optional configuration for the clip
-            
+
         Raises:
             pygame.error: If the audio file cannot be loaded
         """
@@ -51,13 +56,13 @@ class AudioManager:
 
     def play_sound(self, name: str) -> Optional[pygame.mixer.Channel]:
         """Play a sound effect.
-        
+
         Args:
             name: Name of the clip to play
-            
+
         Returns:
             Channel the sound is playing on, or None if playback failed
-            
+
         Raises:
             KeyError: If the clip doesn't exist
         """
@@ -74,10 +79,10 @@ class AudioManager:
 
     def play_music(self, name: str) -> None:
         """Play background music.
-        
+
         Args:
             name: Name of the clip to play
-            
+
         Raises:
             KeyError: If the clip doesn't exist
         """
@@ -112,7 +117,7 @@ class AudioManager:
 
     def set_master_volume(self, volume: float) -> None:
         """Set the master volume level.
-        
+
         Args:
             volume: Volume level from 0.0 to 1.0
         """
@@ -121,7 +126,7 @@ class AudioManager:
 
     def set_music_volume(self, volume: float) -> None:
         """Set the music volume level.
-        
+
         Args:
             volume: Volume level from 0.0 to 1.0
         """
@@ -131,7 +136,7 @@ class AudioManager:
 
     def set_sfx_volume(self, volume: float) -> None:
         """Set the sound effects volume level.
-        
+
         Args:
             volume: Volume level from 0.0 to 1.0
         """
@@ -151,10 +156,10 @@ class AudioManager:
 
     def _find_channel(self, priority: int) -> Optional[pygame.mixer.Channel]:
         """Find a free channel or one with lower priority.
-        
+
         Args:
             priority: Priority level of the sound to play
-            
+
         Returns:
             Available channel or None if none found
         """
