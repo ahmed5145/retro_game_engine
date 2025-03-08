@@ -1,4 +1,5 @@
-"""Simple platformer example using the Entity Component System."""
+"""Platformer example game using the Entity Component System."""
+import os
 import sys
 
 import pygame
@@ -7,26 +8,46 @@ from examples.platformer.components import BoxCollider, Physics, PlayerControlle
 from examples.platformer.systems import collision_system, physics_system, player_system
 from src.core.ecs import World
 from src.core.ecs.components import SpriteRenderer, Transform
-from src.core.sprite import Sprite, SpriteSheet
+from src.core.sprite import Sprite, SpriteConfig, SpriteFrame, SpriteSheet
 from src.core.vector2d import Vector2D
+from src.core.window import Window, WindowConfig
 
 
 class PlatformerGame:
-    """Simple platformer game using ECS."""
+    """Simple platformer game example."""
 
     def __init__(self) -> None:
         """Initialize the game."""
-        pygame.init()
-        self.screen = pygame.display.set_mode((800, 600))
-        pygame.display.set_caption("Platformer Example")
-        self.clock = pygame.time.Clock()
-        self.running = True
-
-        # Create world
+        # Initialize window
+        config = WindowConfig(
+            title="Platformer Example", width=800, height=600, scale=1, vsync=True
+        )
+        self.window = Window(config)
         self.world = World()
+        self.running = True
+        self.clock = pygame.time.Clock()
 
-        # Load assets and create entities
+        # Load sprites
+        self.sprite_sheet = self._load_sprites()
+
+        # Set up game
         self.setup_game()
+
+    def _load_sprites(self) -> SpriteSheet:
+        """Load game sprites.
+
+        Returns:
+            Loaded sprite sheet
+        """
+        # Create sprite sheet
+        assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+        sprite_sheet = SpriteSheet(os.path.join(assets_dir, "sprites.png"))
+
+        # Add frames
+        sprite_sheet.add_frame(SpriteFrame(0, 0, 32, 32))  # Player
+        sprite_sheet.add_frame(SpriteFrame(32, 0, 32, 32))  # Platform
+
+        return sprite_sheet
 
     def setup_game(self) -> None:
         """Set up the initial game state."""
@@ -37,22 +58,16 @@ class PlatformerGame:
         player.add_component(Physics())
         player.add_component(BoxCollider(width=32, height=32))
 
-        # TODO: Add sprite renderer once we have player sprite
-        # player.add_component(SpriteRenderer(player_sprite))
+        # Add player sprite
+        player_sprite = Sprite(self.sprite_sheet)
+        player_sprite.set_frame(0)  # Use first frame for player
+        player.add_component(SpriteRenderer(sprite=player_sprite))
 
-        # Create platforms
-        # Main ground platform
-        self.create_platform(400, 550, 600, 32)  # Ground
-
-        # Left side platforms
-        self.create_platform(150, 450, 200, 32)  # Left platform
-        self.create_platform(150, 350, 100, 32)  # Upper left platform
-
-        # Right side platforms
+        # Create ground
+        self.create_platform(400, 500, 800, 32)  # Ground
+        self.create_platform(200, 400, 200, 32)  # Left platform
         self.create_platform(650, 450, 200, 32)  # Right platform
         self.create_platform(650, 350, 100, 32)  # Upper right platform
-
-        # Middle platform
         self.create_platform(400, 250, 200, 32)  # Top middle platform
 
     def create_platform(self, x: float, y: float, width: float, height: float) -> None:
@@ -67,7 +82,14 @@ class PlatformerGame:
         platform = self.world.create_entity("platform")
         platform.add_component(Transform(position=Vector2D(x, y)))
         platform.add_component(BoxCollider(width=width, height=height, is_static=True))
-        # TODO: Add sprite renderer once we have platform sprite
+
+        # Add sprite renderer with proper scaling
+        sprite = Sprite(self.sprite_sheet)
+        sprite.set_frame(1)  # Use second frame for platform
+        renderer = SpriteRenderer(sprite=sprite)
+        renderer.config.scale_x = width / 32  # Scale to match collider width
+        renderer.config.scale_y = height / 32  # Scale to match collider height
+        platform.add_component(renderer)
 
     def handle_events(self) -> None:
         """Handle pygame events."""
@@ -89,29 +111,24 @@ class PlatformerGame:
 
     def render(self) -> None:
         """Render the game."""
-        self.screen.fill((100, 100, 255))  # Sky blue background
+        # Clear window
+        self.window.clear((100, 100, 255))  # Sky blue background
 
-        # TODO: Add rendering system
-        # for entity in self.world.get_entities_with_component(SpriteRenderer):
-        #     renderer = entity.get_component(SpriteRenderer)
-        #     if renderer:
-        #         renderer.render(self.screen)
+        # Get all sprite renderers
+        renderers = []
+        for entity in self.world._entities.values():
+            if renderer := entity.get_component(SpriteRenderer):
+                renderers.append(renderer)
 
-        # Debug rendering
-        for entity in self.world.get_entities_with_component(BoxCollider):
-            collider = entity.get_component(BoxCollider)
-            transform = entity.get_component(Transform)
-            if collider and transform:
-                rect = pygame.Rect(
-                    transform.position.x - collider.width / 2,
-                    transform.position.y - collider.height / 2,
-                    collider.width,
-                    collider.height,
-                )
-                color = (255, 0, 0) if collider.is_static else (0, 255, 0)
-                pygame.draw.rect(self.screen, color, rect, 2)
+        # Sort by Y position for basic depth
+        renderers.sort(key=lambda r: r.entity.get_component(Transform).position.y)
 
-        pygame.display.flip()
+        # Render all sprites
+        for renderer in renderers:
+            renderer.render(self.window.surface)
+
+        # Present frame
+        self.window.present()
 
     def run(self) -> None:
         """Run the game loop."""

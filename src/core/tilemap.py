@@ -1,13 +1,17 @@
 """Core tilemap system implementation."""
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
+
 import pygame
+
 from .sprite import SpriteSheet
 from .vector2d import Vector2D
+
 
 @dataclass
 class TileConfig:
     """Configuration for a tile."""
+
     solid: bool = False  # Whether the tile blocks movement
     animated: bool = False  # Whether the tile is animated
     frames: List[int] = field(default_factory=list)  # Frame indices for animation
@@ -17,9 +21,11 @@ class TileConfig:
     current_frame: int = 0
     frame_timer: float = 0.0
 
+
 @dataclass
 class TileLayerConfig:
     """Configuration for a tile layer."""
+
     z_index: int = 0  # Rendering order
     scroll_factor_x: float = 1.0  # Parallax scrolling factor
     scroll_factor_y: float = 1.0
@@ -27,12 +33,15 @@ class TileLayerConfig:
     opacity: int = 255
     parallax: Vector2D = field(default_factory=lambda: Vector2D(1.0, 1.0))
 
+
 class TileLayer:
     """A single layer of tiles."""
 
-    def __init__(self, width: int, height: int, config: Optional[TileLayerConfig] = None):
+    def __init__(
+        self, width: int, height: int, config: Optional[TileLayerConfig] = None
+    ):
         """Initialize the tile layer.
-        
+
         Args:
             width: Width of the layer in tiles
             height: Height of the layer in tiles
@@ -47,12 +56,12 @@ class TileLayer:
 
     def set_tile(self, x: int, y: int, tile_id: Optional[int]) -> None:
         """Set a tile at the given position.
-        
+
         Args:
             x: X coordinate in tiles
             y: Y coordinate in tiles
             tile_id: ID of the tile to set, or None to clear
-            
+
         Raises:
             IndexError: If coordinates are out of bounds
         """
@@ -63,14 +72,14 @@ class TileLayer:
 
     def get_tile(self, x: int, y: int) -> Optional[int]:
         """Get the tile at the given position.
-        
+
         Args:
             x: X coordinate in tiles
             y: Y coordinate in tiles
-            
+
         Returns:
             The tile ID, or None if empty
-            
+
         Raises:
             IndexError: If coordinates are out of bounds
         """
@@ -87,7 +96,7 @@ class TileLayer:
 
     def fill(self, tile_id: int) -> None:
         """Fill the entire layer with a tile.
-        
+
         Args:
             tile_id: ID of the tile to fill with
         """
@@ -96,12 +105,13 @@ class TileLayer:
                 self.tiles[y][x] = tile_id
         self.dirty = True
 
+
 class Tilemap:
     """Manages multiple tile layers and provides efficient rendering."""
 
     def __init__(self, tile_width: int, tile_height: int, tileset: SpriteSheet):
         """Initialize the tilemap.
-        
+
         Args:
             tile_width: Width of each tile in pixels
             tile_height: Height of each tile in pixels
@@ -115,7 +125,9 @@ class Tilemap:
         self.time = 0.0  # Time for animated tiles
         self._width = 0  # Maximum width of all layers
         self._height = 0  # Maximum height of all layers
-        self.collision_layer: Optional[str] = None  # Name of layer to use for collisions
+        self.collision_layer: Optional[
+            str
+        ] = None  # Name of layer to use for collisions
 
     @property
     def width(self) -> int:
@@ -127,16 +139,21 @@ class Tilemap:
         """Get the height of the tilemap in tiles."""
         return max((layer.height for layer in self.layers.values()), default=0)
 
-    def add_layer(self, name: str, width: int, height: int,
-                 config: Optional[TileLayerConfig] = None) -> None:
+    def add_layer(
+        self,
+        name: str,
+        width: int,
+        height: int,
+        config: Optional[TileLayerConfig] = None,
+    ) -> None:
         """Add a new tile layer.
-        
+
         Args:
             name: Name of the layer
             width: Width of the layer in tiles
             height: Height of the layer in tiles
             config: Layer configuration (default: None)
-            
+
         Raises:
             ValueError: If layer already exists
         """
@@ -146,7 +163,7 @@ class Tilemap:
 
     def remove_layer(self, name: str) -> None:
         """Remove a tile layer.
-        
+
         Args:
             name: Name of the layer to remove
         """
@@ -155,13 +172,13 @@ class Tilemap:
 
     def get_layer(self, name: str) -> TileLayer:
         """Get a tile layer by name.
-        
+
         Args:
             name: Name of the layer
-            
+
         Returns:
             The requested layer
-            
+
         Raises:
             KeyError: If layer doesn't exist
         """
@@ -171,7 +188,7 @@ class Tilemap:
 
     def set_tile_config(self, tile_id: int, config: TileConfig) -> None:
         """Set the configuration for a tile type.
-        
+
         Args:
             tile_id: ID of the tile
             config: Configuration for the tile
@@ -180,10 +197,10 @@ class Tilemap:
 
     def get_tile_config(self, tile_id: int) -> Optional[TileConfig]:
         """Get the configuration for a tile type.
-        
+
         Args:
             tile_id: ID of the tile
-            
+
         Returns:
             The tile configuration, or None if not configured
         """
@@ -191,7 +208,7 @@ class Tilemap:
 
     def update(self, dt: float) -> None:
         """Update animated tiles.
-        
+
         Args:
             dt: Time elapsed since last update in seconds
         """
@@ -208,16 +225,17 @@ class Tilemap:
         if max_duration > 0:
             self.time = self.time % max_duration
 
-    def _get_visible_range(self, camera_x: int, camera_y: int,
-                        view_width: int, view_height: int) -> Tuple[int, int, int, int]:
+    def _get_visible_range(
+        self, camera_x: int, camera_y: int, view_width: int, view_height: int
+    ) -> Tuple[int, int, int, int]:
         """Calculate the range of tiles visible in the view.
-        
+
         Args:
             camera_x: Camera X position in pixels
             camera_y: Camera Y position in pixels
             view_width: Width of the view in pixels
             view_height: Height of the view in pixels
-            
+
         Returns:
             Tuple of (start_x, start_y, end_x, end_y) tile coordinates
         """
@@ -226,16 +244,22 @@ class Tilemap:
         start_y = max(0, camera_y // self.tile_height)
 
         # Calculate end coordinates (add 1 to account for partial tiles)
-        tiles_x = (view_width + (camera_x % self.tile_width) + self.tile_width - 1) // self.tile_width
-        tiles_y = (view_height + (camera_y % self.tile_height) + self.tile_height - 1) // self.tile_height
+        tiles_x = (
+            view_width + (camera_x % self.tile_width) + self.tile_width - 1
+        ) // self.tile_width
+        tiles_y = (
+            view_height + (camera_y % self.tile_height) + self.tile_height - 1
+        ) // self.tile_height
         end_x = min(self.width, start_x + tiles_x)
         end_y = min(self.height, start_y + tiles_y)
 
         return start_x, start_y, end_x, end_y
 
-    def render(self, surface: pygame.Surface, camera_x: int = 0, camera_y: int = 0) -> None:
+    def render(
+        self, surface: pygame.Surface, camera_x: int = 0, camera_y: int = 0
+    ) -> None:
         """Render the tilemap with culling of off-screen tiles.
-        
+
         Args:
             surface: Surface to render to
             camera_x: Camera X position in pixels (default: 0)
@@ -249,10 +273,7 @@ class Tilemap:
         )
 
         # Sort layers by z-index
-        sorted_layers = sorted(
-            self.layers.items(),
-            key=lambda x: x[1].config.z_index
-        )
+        sorted_layers = sorted(self.layers.items(), key=lambda x: x[1].config.z_index)
 
         # Render each layer
         for _, layer in sorted_layers:
@@ -279,7 +300,9 @@ class Tilemap:
                     # Get current frame for animated tiles
                     config = self.tile_configs.get(tile_id)
                     if config and config.animated and config.frames:
-                        frame_index = int(self.time / config.frame_duration) % len(config.frames)
+                        frame_index = int(self.time / config.frame_duration) % len(
+                            config.frames
+                        )
                         tile_id = config.frames[frame_index]
 
                     # Skip invalid tile IDs
@@ -294,11 +317,13 @@ class Tilemap:
                     frame = self.tileset.frames[tile_id]
 
                     # Create temporary surface for the tile with alpha
-                    tile_surface = pygame.Surface((self.tile_width, self.tile_height), pygame.SRCALPHA)
+                    tile_surface = pygame.Surface(
+                        (self.tile_width, self.tile_height), pygame.SRCALPHA
+                    )
                     tile_surface.blit(
                         self.tileset.texture,
                         (0, 0),
-                        (frame.x, frame.y, frame.width, frame.height)
+                        (frame.x, frame.y, frame.width, frame.height),
                     )
 
                     # Apply layer opacity
@@ -310,10 +335,10 @@ class Tilemap:
 
     def set_collision_layer(self, layer_name: str) -> None:
         """Set which layer to use for collision detection.
-        
+
         Args:
             layer_name: Name of the layer to use for collisions
-            
+
         Raises:
             KeyError: If layer doesn't exist
         """
@@ -323,11 +348,11 @@ class Tilemap:
 
     def get_tile_at_position(self, x: float, y: float) -> Tuple[Optional[int], str]:
         """Get the tile at a world position.
-        
+
         Args:
             x: X coordinate in pixels
             y: Y coordinate in pixels
-            
+
         Returns:
             Tuple of (tile_id, layer_name) or (None, "") if no tile
         """
@@ -337,9 +362,7 @@ class Tilemap:
 
         # Check each layer from top to bottom
         for name, layer in sorted(
-            self.layers.items(),
-            key=lambda x: x[1].config.z_index,
-            reverse=True
+            self.layers.items(), key=lambda x: x[1].config.z_index, reverse=True
         ):
             if not layer.config.visible:
                 continue
@@ -353,7 +376,9 @@ class Tilemap:
 
         return None, ""
 
-    def get_solid_tiles_in_rect(self, rect: pygame.Rect) -> List[Tuple[pygame.Rect, Vector2D]]:
+    def get_solid_tiles_in_rect(
+        self, rect: pygame.Rect
+    ) -> List[Tuple[pygame.Rect, Vector2D]]:
         """Get all solid tiles that intersect with the given rectangle."""
         if not self.collision_layer:
             return []
@@ -365,22 +390,28 @@ class Tilemap:
         start_x = max(0, rect.left // self.tile_width)
         start_y = max(0, rect.top // self.tile_height)
         end_x = min(layer.width, (rect.right + self.tile_width - 1) // self.tile_width)
-        end_y = min(layer.height, (rect.bottom + self.tile_height - 1) // self.tile_height)
+        end_y = min(
+            layer.height, (rect.bottom + self.tile_height - 1) // self.tile_height
+        )
 
         for y in range(int(start_y), int(end_y)):
             for x in range(int(start_x), int(end_x)):
                 tile = layer.get_tile(x, y)
                 if tile is not None and self.tile_configs.get(tile, TileConfig()).solid:
-                    tile_rect = pygame.Rect(x * self.tile_width, y * self.tile_height, 
-                                          self.tile_width, self.tile_height)
+                    tile_rect = pygame.Rect(
+                        x * self.tile_width,
+                        y * self.tile_height,
+                        self.tile_width,
+                        self.tile_height,
+                    )
                     if rect.colliderect(tile_rect):
                         # Calculate intersection
                         intersection = rect.clip(tile_rect)
-                        
+
                         # Calculate the relative position of the rectangles' centers
                         dx = rect.centerx - tile_rect.centerx
                         dy = rect.centery - tile_rect.centery
-                        
+
                         # For equal intersections, we want to prioritize horizontal collisions
                         # and use the relative position to determine the direction
                         if abs(dx) >= abs(dy):
@@ -395,37 +426,84 @@ class Tilemap:
                                 normal = Vector2D(0.0, -1.0)  # Push up
                             else:
                                 normal = Vector2D(0.0, 1.0)  # Push down
-                        
+
                         solid_tiles.append((tile_rect, normal))
 
         return solid_tiles
 
     def check_collision(self, rect: pygame.Rect) -> Optional[Tuple[Vector2D, float]]:
         """Check for collision with solid tiles.
-        
+
         Args:
-            rect: Rectangle in world coordinates
-            
+            rect: Rectangle to check collision with
+
         Returns:
-            Tuple of (surface_normal, penetration) or None if no collision
+            Tuple of (collision normal, penetration depth) or None if no collision.
+            The normal points in the direction the colliding object should move to resolve the collision.
+            For example, if object A collides with the right side of object B, the normal will be (1.0, 0.0)
+            indicating A should move right to resolve the collision.
         """
-        solid_tiles = self.get_solid_tiles_in_rect(rect)
-        if not solid_tiles:
+        colliding_tiles = self.get_solid_tiles_in_rect(rect)
+        if not colliding_tiles:
             return None
 
         # Find the collision with the smallest penetration
-        min_penetration = float('inf')
+        min_penetration = float("inf")
         collision_normal = Vector2D()
 
-        for tile_rect, normal in solid_tiles:
-            # Calculate penetration depth
-            if normal.x != 0:  # Horizontal collision
-                penetration = (rect.width + tile_rect.width) / 2 - abs(rect.centerx - tile_rect.centerx)
-            else:  # Vertical collision
-                penetration = (rect.height + tile_rect.height) / 2 - abs(rect.centery - tile_rect.centery)
+        for tile_rect, _ in colliding_tiles:
+            # Calculate overlap distances
+            x_overlap = min(rect.right, tile_rect.right) - max(
+                rect.left, tile_rect.left
+            )
+            y_overlap = min(rect.bottom, tile_rect.bottom) - max(
+                rect.top, tile_rect.top
+            )
 
-            if penetration < min_penetration:
-                min_penetration = penetration
-                collision_normal = normal
+            if x_overlap > 0 and y_overlap > 0:
+                # Calculate the centers
+                rect_center_x = rect.left + rect.width / 2
+                rect_center_y = rect.top + rect.height / 2
+                tile_center_x = tile_rect.left + tile_rect.width / 2
+                tile_center_y = tile_rect.top + tile_rect.height / 2
 
-        return (collision_normal, min_penetration) if min_penetration < float('inf') else None
+                # Calculate the vector from tile center to rect center
+                dx = rect_center_x - tile_center_x
+                dy = rect_center_y - tile_center_y
+
+                # Calculate the ratio of position difference to combined size
+                x_ratio = abs(dx) / (rect.width + tile_rect.width) * 2
+                y_ratio = abs(dy) / (rect.height + tile_rect.height) * 2
+
+                # Use the axis with the larger position ratio to determine collision normal
+                if x_ratio >= y_ratio:
+                    # X-axis collision (horizontal)
+                    if dx > 0:
+                        # Right collision - penetration is the width of the colliding rectangle
+                        penetration = rect.width
+                        normal = Vector2D(1.0, 0.0)
+                    else:
+                        # Left collision - penetration is the overlap amount
+                        penetration = x_overlap
+                        normal = Vector2D(-1.0, 0.0)
+                else:
+                    # Y-axis collision (vertical)
+                    if dy > 0:
+                        # Bottom collision - penetration is the height of the colliding rectangle
+                        penetration = rect.height
+                        normal = Vector2D(0.0, 1.0)
+                    else:
+                        # Top collision - penetration is the overlap amount
+                        penetration = y_overlap
+                        normal = Vector2D(0.0, -1.0)
+
+                # Keep the collision with smallest penetration
+                if penetration < min_penetration:
+                    min_penetration = penetration
+                    collision_normal = normal
+
+        return (
+            (collision_normal, min_penetration)
+            if min_penetration < float("inf")
+            else None
+        )

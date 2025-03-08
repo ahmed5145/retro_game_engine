@@ -4,12 +4,16 @@ import pytest
 from src.core.ecs import Component, Entity
 
 
-class TestComponent(Component):
+class DummyComponent(Component):
     """Test component for testing."""
 
-    def __init__(self, value: int = 0):
-        super().__init__()
-        self.value = value
+    value: int = 0
+
+
+@pytest.fixture
+def test_component() -> DummyComponent:
+    """Create a test component."""
+    return DummyComponent()
 
 
 def test_entity_initialization() -> None:
@@ -28,42 +32,41 @@ def test_entity_auto_name() -> None:
     assert len(entity.name) > 7  # Should have UUID part
 
 
-def test_add_component() -> None:
+def test_add_component(test_component: DummyComponent) -> None:
     """Test adding components to entity."""
     entity = Entity()
-    component = TestComponent(42)
+    test_component.value = 42
 
-    entity.add_component(component)
-    assert entity.has_component(TestComponent)
-    assert component.entity == entity
+    entity.add_component(test_component)
+    assert entity.has_component(DummyComponent)
+    assert test_component.entity == entity
 
     # Test adding duplicate component type
     with pytest.raises(ValueError):
-        entity.add_component(TestComponent())
+        entity.add_component(DummyComponent())
 
 
-def test_remove_component() -> None:
+def test_remove_component(test_component: DummyComponent) -> None:
     """Test removing components from entity."""
     entity = Entity()
-    component = TestComponent()
 
-    entity.add_component(component)
-    assert entity.has_component(TestComponent)
+    entity.add_component(test_component)
+    assert entity.has_component(DummyComponent)
 
-    entity.remove_component(TestComponent)
-    assert not entity.has_component(TestComponent)
-    assert component.entity is None
+    entity.remove_component(DummyComponent)
+    assert not entity.has_component(DummyComponent)
+    assert test_component.entity is None
 
 
-def test_get_component() -> None:
+def test_get_component(test_component: DummyComponent) -> None:
     """Test getting components from entity."""
     entity = Entity()
-    component = TestComponent(42)
+    test_component.value = 42
 
-    entity.add_component(component)
-    retrieved = entity.get_component(TestComponent)
-    assert retrieved is component
-    assert retrieved.value == 42  # type: ignore
+    entity.add_component(test_component)
+    retrieved = entity.get_component(DummyComponent)
+    assert retrieved is test_component
+    assert retrieved.value == 42
 
     # Test getting non-existent component
     assert entity.get_component(Component) is None

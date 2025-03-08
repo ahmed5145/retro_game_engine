@@ -4,12 +4,16 @@ import pytest
 from src.core.ecs import Component, Entity, World
 
 
-class TestComponent(Component):
+class DummyComponent(Component):
     """Test component for testing."""
 
-    def __init__(self, value: int = 0):
-        super().__init__()
-        self.value = value
+    value: int = 0
+
+
+@pytest.fixture
+def test_component() -> DummyComponent:
+    """Create a test component."""
+    return DummyComponent()
 
 
 def test_world_initialization() -> None:
@@ -74,39 +78,42 @@ def test_add_system() -> None:
     assert calls[0] == 0.016
 
 
-def test_get_entities_with_component() -> None:
+def test_get_entities_with_component(test_component: DummyComponent) -> None:
     """Test querying entities by component type."""
     world = World()
 
     # Create some entities with different components
     entity1 = world.create_entity()
-    entity1.add_component(TestComponent(1))
+    test_component.value = 1
+    entity1.add_component(test_component)
 
     entity2 = world.create_entity()
-    entity2.add_component(TestComponent(2))
+    component2 = DummyComponent()
+    component2.value = 2
+    entity2.add_component(component2)
 
     entity3 = world.create_entity()  # No component
 
     # Test querying
-    entities = world.get_entities_with_component(TestComponent)
+    entities = world.get_entities_with_component(DummyComponent)
     assert len(entities) == 2
     assert entity1 in entities
     assert entity2 in entities
     assert entity3 not in entities
 
     # Test cache
-    assert TestComponent in world._component_cache
-    assert world._component_cache[TestComponent] == entities
+    assert DummyComponent in world._component_cache
+    assert world._component_cache[DummyComponent] == entities
 
 
-def test_component_cache_invalidation() -> None:
+def test_component_cache_invalidation(test_component: DummyComponent) -> None:
     """Test that component cache is properly invalidated."""
     world = World()
 
     # Create entity and cache query
     entity = world.create_entity()
-    entity.add_component(TestComponent())
-    entities1 = world.get_entities_with_component(TestComponent)
+    entity.add_component(test_component)
+    entities1 = world.get_entities_with_component(DummyComponent)
     assert len(entities1) == 1
 
     # Remove entity and verify cache is cleared
@@ -115,19 +122,19 @@ def test_component_cache_invalidation() -> None:
     assert len(world._component_cache) == 0
 
     # Query again
-    entities2 = world.get_entities_with_component(TestComponent)
+    entities2 = world.get_entities_with_component(DummyComponent)
     assert len(entities2) == 0
 
 
-def test_clear() -> None:
+def test_clear(test_component: DummyComponent) -> None:
     """Test clearing all entities from the world."""
     world = World()
 
     # Add some entities
     entity1 = world.create_entity()
-    entity1.add_component(TestComponent())
+    entity1.add_component(test_component)
     entity2 = world.create_entity()
-    world.get_entities_with_component(TestComponent)  # Build cache
+    world.get_entities_with_component(DummyComponent)  # Build cache
 
     # Clear world
     world.clear()

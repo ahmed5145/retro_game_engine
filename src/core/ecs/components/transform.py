@@ -1,4 +1,5 @@
 """Transform component for positioning entities in the game world."""
+import math
 from dataclasses import dataclass, field
 
 from src.core.ecs import Component
@@ -59,10 +60,25 @@ class Transform(Component):
         if not parent_transform:
             return self.position + self.local_position
 
-        # TODO: Implement proper transform hierarchy with rotation and scale
-        return (
-            parent_transform.get_world_position() + self.position + self.local_position
-        )
+        # Get parent's world transform
+        parent_pos = parent_transform.get_world_position()
+        parent_rot = math.radians(parent_transform.get_world_rotation())
+        parent_scale = parent_transform.get_world_scale()
+
+        # Calculate rotated and scaled local position
+        local_x = self.local_position.x * math.cos(
+            parent_rot
+        ) - self.local_position.y * math.sin(parent_rot)
+        local_y = self.local_position.x * math.sin(
+            parent_rot
+        ) + self.local_position.y * math.cos(parent_rot)
+        local_pos = Vector2D(local_x, local_y)
+
+        # Apply parent scale to local position
+        local_pos = Vector2D(local_pos.x * parent_scale.x, local_pos.y * parent_scale.y)
+
+        # Calculate final position
+        return parent_pos + local_pos + self.position
 
     def get_world_rotation(self) -> float:
         """Calculate the world rotation considering parent transforms.
@@ -79,7 +95,7 @@ class Transform(Component):
 
         return (
             parent_transform.get_world_rotation() + self.rotation + self.local_rotation
-        )
+        ) % 360.0
 
     def get_world_scale(self) -> Vector2D:
         """Calculate the world scale considering parent transforms.
