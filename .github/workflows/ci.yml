@@ -15,38 +15,39 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
         version: 1.7.1
         virtualenvs-create: true
         virtualenvs-in-project: true
-    
+
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-pygame
         poetry install --no-interaction
-    
+
     - name: Run tests with coverage
       run: |
         poetry run pytest --cov=src --cov-report=xml
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
+      continue-on-error: true
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
-        fail_ci_if_error: true
-    
+
     - name: Type checking
       run: poetry run mypy src tests
-    
+
     - name: Lint
       run: poetry run pylint src tests
 
@@ -55,24 +56,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
-    
+
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
         version: 1.7.1
         virtualenvs-create: true
         virtualenvs-in-project: true
-    
+
     - name: Build package
       run: poetry build
-    
+
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: dist
-        path: dist/ 
+        path: dist/

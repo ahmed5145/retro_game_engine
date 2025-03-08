@@ -26,6 +26,7 @@ MANIFEST
 .venv
 env/
 venv/
+test_env/
 ENV/
 env.bak/
 venv.bak/
@@ -59,4 +60,4 @@ site/
 .DS_Store
 test_tileset.png
 *.pyc
-.python-version 
+.python-version
