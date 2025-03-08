@@ -1,4 +1,4 @@
-"""Core engine components."""
+"""Core game engine components."""
 
 from .window import Window, WindowConfig
 from .game_loop import GameLoop, GameLoopConfig, PerformanceMetrics
