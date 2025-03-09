@@ -42,7 +42,9 @@ jobs:
       run: poetry lock --no-update
 
     - name: Install dependencies
-      run: poetry install
+      run: |
+        poetry install --with dev
+        poetry run pip install --upgrade pip setuptools wheel
 
     - name: Run tests
       run: poetry run pytest tests/ --cov=src --cov-report=xml

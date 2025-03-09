@@ -33,6 +33,7 @@ isort = "^5.13.2"
 flake8 = "^7.0.0"
 mypy = "^1.8.0"
 pre-commit = "^3.6.0"
+pylint = "^3.0.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -117,3 +118,26 @@ per-file-ignores = [
     "__init__.py:F401",  # Ignore unused imports in __init__.py files
     "tests/*:D,F841",    # Ignore docstring issues and unused variables in tests
 ]
+
+[tool.pylint.messages_control]
+disable = [
+    "C0111",  # missing-docstring
+    "C0103",  # invalid-name
+    "W0611",  # unused-import
+    "E1101",  # no-member (for pygame attributes)
+    "C0301",  # line-too-long
+    "R0903",  # too-few-public-methods
+    "R0913",  # too-many-arguments
+    "R0914",  # too-many-locals
+    "W0621",  # redefined-outer-name (for pytest fixtures)
+]
+
+[tool.pylint.format]
+max-line-length = 88  # Match black's default
+
+[tool.pylint.basic]
+good-names = ["i", "j", "k", "ex", "Run", "_", "x", "y", "dx", "dy", "id", "fp", "dt"]
+
+[tool.pylint.typecheck]
+# List of module names for which member attributes should not be checked
+ignored-modules = ["pygame"]
