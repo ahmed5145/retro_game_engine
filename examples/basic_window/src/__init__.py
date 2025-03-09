@@ -1,7 +1,10 @@
 import sys
 from typing import List, Tuple
+
 import pygame
+
 from src.core import Window, WindowConfig
+
 
 def main() -> None:
     # Initialize pygame
@@ -13,7 +16,7 @@ def main() -> None:
         width=320,
         height=240,
         scale=2,
-        vsync=True
+        vsync=True,
     )
 
     # Create window
@@ -21,7 +24,11 @@ def main() -> None:
 
     # Main game loop
     running = True
-    colors: List[Tuple[int, int, int]] = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]  # Red, Green, Blue
+    colors: List[Tuple[int, int, int]] = [
+        (255, 0, 0),
+        (0, 255, 0),
+        (0, 0, 255),
+    ]  # Red, Green, Blue
     current_color = 0
 
     while running:
@@ -47,6 +54,7 @@ def main() -> None:
     # Cleanup
     pygame.quit()
     sys.exit()
+
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,8 @@
 """Generate sprite sheet for the example."""
 import os
+
 import pygame
+
 
 def main() -> None:
     """Generate the sprite sheet."""
@@ -48,6 +50,7 @@ def main() -> None:
     pygame.image.save(surface, os.path.join(assets_dir, "character.png"))
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()

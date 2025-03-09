@@ -1,13 +1,16 @@
 """Demo showcasing scene management and transitions."""
 import sys
 from typing import Optional
+
 import pygame
+
 from src.core import Window, WindowConfig
 from src.core.ecs import World
 from src.core.ecs.components import Transform
 from src.core.scene import Scene
 from src.core.scene_manager import SceneManager
 from src.core.vector2d import Vector2D
+
 
 class MenuScene(Scene):
     """Main menu scene."""
@@ -27,7 +30,7 @@ class MenuScene(Scene):
 
     def update(self, dt: float) -> None:
         """Update the menu scene.
-        
+
         Args:
             dt: Delta time in seconds
         """
@@ -35,13 +38,19 @@ class MenuScene(Scene):
 
         # Handle input
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] and not self.get_environment_variable("key_pressed", False):
+        if keys[pygame.K_UP] and not self.get_environment_variable(
+            "key_pressed", False
+        ):
             self.selected_option = (self.selected_option - 1) % len(self.options)
             self.set_environment_variable("key_pressed", True)
-        elif keys[pygame.K_DOWN] and not self.get_environment_variable("key_pressed", False):
+        elif keys[pygame.K_DOWN] and not self.get_environment_variable(
+            "key_pressed", False
+        ):
             self.selected_option = (self.selected_option + 1) % len(self.options)
             self.set_environment_variable("key_pressed", True)
-        elif keys[pygame.K_RETURN] and not self.get_environment_variable("key_pressed", False):
+        elif keys[pygame.K_RETURN] and not self.get_environment_variable(
+            "key_pressed", False
+        ):
             self.handle_selection()
             self.set_environment_variable("key_pressed", True)
         elif not any([keys[pygame.K_UP], keys[pygame.K_DOWN], keys[pygame.K_RETURN]]):
@@ -62,7 +71,7 @@ class MenuScene(Scene):
 
     def render(self, surface: pygame.Surface) -> None:
         """Render the menu scene.
-        
+
         Args:
             surface: Surface to render to
         """
@@ -80,6 +89,7 @@ class MenuScene(Scene):
             color = (255, 255, 0) if i == self.selected_option else (255, 255, 255)
             text = self.font.render(option, True, color)
             surface.blit(text, (400 - text.get_width() // 2, 250 + i * 50))
+
 
 class GameScene(Scene):
     """Simple game scene with a moving square."""
@@ -99,7 +109,7 @@ class GameScene(Scene):
 
     def update(self, dt: float) -> None:
         """Update the game scene.
-        
+
         Args:
             dt: Delta time in seconds
         """
@@ -116,7 +126,9 @@ class GameScene(Scene):
 
         # Handle input
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_ESCAPE] and not self.get_environment_variable("key_pressed", False):
+        if keys[pygame.K_ESCAPE] and not self.get_environment_variable(
+            "key_pressed", False
+        ):
             self.set_environment_variable("next_scene", ("pop", None))
             self.set_environment_variable("key_pressed", True)
         elif not keys[pygame.K_ESCAPE]:
@@ -124,23 +136,26 @@ class GameScene(Scene):
 
     def render(self, surface: pygame.Surface) -> None:
         """Render the game scene.
-        
+
         Args:
             surface: Surface to render to
         """
         surface.fill((0, 0, 128))  # Dark blue background
 
         # Draw square
-        pygame.draw.rect(surface, (0, 255, 0), (
-            int(self.square_pos.x - 20),
-            int(self.square_pos.y - 20),
-            40, 40
-        ))
+        pygame.draw.rect(
+            surface,
+            (0, 255, 0),
+            (int(self.square_pos.x - 20), int(self.square_pos.y - 20), 40, 40),
+        )
 
         if self.font:
             # Draw instructions
-            text = self.font.render("Press ESC to return to menu", True, (255, 255, 255))
+            text = self.font.render(
+                "Press ESC to return to menu", True, (255, 255, 255)
+            )
             surface.blit(text, (10, 10))
+
 
 class SettingsScene(Scene):
     """Settings scene."""
@@ -160,7 +175,7 @@ class SettingsScene(Scene):
 
     def update(self, dt: float) -> None:
         """Update the settings scene.
-        
+
         Args:
             dt: Delta time in seconds
         """
@@ -168,13 +183,19 @@ class SettingsScene(Scene):
 
         # Handle input
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] and not self.get_environment_variable("key_pressed", False):
+        if keys[pygame.K_UP] and not self.get_environment_variable(
+            "key_pressed", False
+        ):
             self.selected_option = (self.selected_option - 1) % len(self.options)
             self.set_environment_variable("key_pressed", True)
-        elif keys[pygame.K_DOWN] and not self.get_environment_variable("key_pressed", False):
+        elif keys[pygame.K_DOWN] and not self.get_environment_variable(
+            "key_pressed", False
+        ):
             self.selected_option = (self.selected_option + 1) % len(self.options)
             self.set_environment_variable("key_pressed", True)
-        elif keys[pygame.K_RETURN] and not self.get_environment_variable("key_pressed", False):
+        elif keys[pygame.K_RETURN] and not self.get_environment_variable(
+            "key_pressed", False
+        ):
             if self.options[self.selected_option] == "Back":
                 self.set_environment_variable("next_scene", ("pop", None))
             self.set_environment_variable("key_pressed", True)
@@ -183,7 +204,7 @@ class SettingsScene(Scene):
 
     def render(self, surface: pygame.Surface) -> None:
         """Render the settings scene.
-        
+
         Args:
             surface: Surface to render to
         """
@@ -202,16 +223,13 @@ class SettingsScene(Scene):
             text = self.font.render(option, True, color)
             surface.blit(text, (400 - text.get_width() // 2, 250 + i * 50))
 
+
 def main() -> None:
     """Run the scene management demo."""
     # Initialize pygame and create window
     pygame.init()
     config = WindowConfig(
-        title="Scene Management Demo",
-        width=800,
-        height=600,
-        scale=1,
-        vsync=True
+        title="Scene Management Demo", width=800, height=600, scale=1, vsync=True
     )
     window = Window(config)
 
@@ -259,5 +277,6 @@ def main() -> None:
     pygame.quit()
     sys.exit()
 
+
 if __name__ == "__main__":
-    main() 
+    main()

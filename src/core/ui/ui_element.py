@@ -179,12 +179,17 @@ class UIElement:
         """Check if a point is within the element's bounds.
 
         Args:
-            point: Point to check (x, y)
+            point: The point to check (x, y).
 
         Returns:
-            True if point is within bounds
+            bool: True if the point is within the element's bounds, False otherwise.
         """
-        return self.get_bounds().collidepoint(point)
+        if not self.visible:
+            return False
+
+        x, y = point
+        rect = self.get_bounds()
+        return bool(rect.collidepoint(x, y))
 
     def update(self, dt: float) -> None:
         """Update the element.
@@ -216,27 +221,25 @@ class UIElement:
             child.render(surface)
 
     def handle_event(self, event: pygame.event.Event) -> bool:
-        """Handle an input event.
+        """Handle a pygame event.
 
         Args:
-            event: Event to handle
+            event: The pygame event to handle.
 
         Returns:
-            True if event was handled
+            bool: True if the event was handled, False otherwise.
         """
-        if not self._enabled:
+        if not self.enabled or not self.visible:
             return False
+
+        # Check if event is within bounds for mouse events
+        if hasattr(event, "pos") and self.contains_point(event.pos):
+            return True
 
         # Handle children in reverse z-index order
         sorted_children = sorted(self._children, key=lambda c: c.z_index, reverse=True)
-
-        # Let children handle event first
         for child in sorted_children:
             if child.handle_event(event):
                 return True
-
-        # Check if event is within bounds for mouse events
-        if hasattr(event, "pos"):
-            return self.contains_point(event.pos)
 
         return False

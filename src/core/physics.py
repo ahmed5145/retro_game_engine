@@ -1,31 +1,37 @@
 """Core physics system implementation."""
 from dataclasses import dataclass, field
-from typing import Tuple, Optional
+
 import pygame
+
 from .vector2d import Vector2D
+
 
 @dataclass
 class PhysicsConfig:
     """Configuration for physics behavior."""
+
     gravity: Vector2D = field(default_factory=lambda: Vector2D(0.0, 980.0))
     max_velocity: Vector2D = field(default_factory=lambda: Vector2D(500.0, 1000.0))
     friction: float = 0.8  # Friction coefficient (0 to 1)
     bounce: float = 0.0  # Bounce coefficient (0 to 1)
 
+
 @dataclass
 class PhysicsState:
     """Current state of a physics object."""
+
     position: Vector2D = field(default_factory=Vector2D)
     velocity: Vector2D = field(default_factory=Vector2D)
     acceleration: Vector2D = field(default_factory=Vector2D)
     grounded: bool = False
+
 
 class PhysicsBody:
     """A physical body with basic physics properties."""
 
     def __init__(self, config: PhysicsConfig):
         """Initialize the physics body.
-        
+
         Args:
             config: Physics configuration
         """
@@ -35,7 +41,7 @@ class PhysicsBody:
 
     def apply_force(self, force: Vector2D) -> None:
         """Apply a force to the body.
-        
+
         Args:
             force: Force vector to apply
         """
@@ -43,19 +49,21 @@ class PhysicsBody:
 
     def set_velocity(self, velocity: Vector2D) -> None:
         """Set the velocity directly.
-        
+
         Args:
             velocity: New velocity vector
         """
         # Clamp each component separately
         self.state.velocity = Vector2D(
-            min(abs(velocity.x), self.config.max_velocity.x) * (1 if velocity.x > 0 else -1),
-            min(abs(velocity.y), self.config.max_velocity.y) * (1 if velocity.y > 0 else -1)
+            min(abs(velocity.x), self.config.max_velocity.x)
+            * (1 if velocity.x > 0 else -1),
+            min(abs(velocity.y), self.config.max_velocity.y)
+            * (1 if velocity.y > 0 else -1),
         )
 
     def update(self, dt: float) -> None:
         """Update physics state.
-        
+
         Args:
             dt: Time step in seconds
         """
@@ -75,8 +83,10 @@ class PhysicsBody:
 
         # Clamp velocity to maximum
         self.state.velocity = Vector2D(
-            min(abs(self.state.velocity.x), self.config.max_velocity.x) * (1 if self.state.velocity.x > 0 else -1),
-            min(abs(self.state.velocity.y), self.config.max_velocity.y) * (1 if self.state.velocity.y > 0 else -1)
+            min(abs(self.state.velocity.x), self.config.max_velocity.x)
+            * (1 if self.state.velocity.x > 0 else -1),
+            min(abs(self.state.velocity.y), self.config.max_velocity.y)
+            * (1 if self.state.velocity.y > 0 else -1),
         )
 
         # Update position using average velocity
@@ -92,7 +102,7 @@ class PhysicsBody:
 
     def handle_collision(self, normal: Vector2D, penetration: float) -> None:
         """Handle collision response.
-        
+
         Args:
             normal: Surface normal of the collision
             penetration: Penetration depth

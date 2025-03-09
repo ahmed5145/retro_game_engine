@@ -1,32 +1,31 @@
 """Example demonstrating the tilemap system features."""
-import os
 import math
+import os
+
 import pygame
+
 from src.core import (
-    Window, WindowConfig,
-    GameLoop, GameLoopConfig,
+    GameLoop,
+    GameLoopConfig,
     InputManager,
-    SpriteSheet, SpriteFrame
+    SpriteFrame,
+    SpriteSheet,
+    Window,
+    WindowConfig,
 )
-from src.core.tilemap import Tilemap, TileConfig, TileLayerConfig
+from src.core.tilemap import TileConfig, TileLayerConfig, Tilemap
+
 
 class Game:
     def __init__(self) -> None:
         # Initialize window
         window_config = WindowConfig(
-            title="Tilemap System Example",
-            width=640,
-            height=480,
-            scale=1,
-            vsync=True
+            title="Tilemap System Example", width=640, height=480, scale=1, vsync=True
         )
         self.window = Window(window_config)
 
         # Initialize game loop
-        loop_config = GameLoopConfig(
-            target_fps=60,
-            fixed_update_fps=50
-        )
+        loop_config = GameLoopConfig(target_fps=60, fixed_update_fps=50)
         self.game_loop = GameLoop(loop_config)
 
         # Initialize input
@@ -78,18 +77,14 @@ class Game:
         water_config = TileConfig(
             animated=True,
             frames=[4, 5, 6, 7],  # Water animation frames
-            frame_duration=0.2
+            frame_duration=0.2,
         )
         self.tilemap.set_tile_config(4, water_config)
 
     def _setup_tilemap(self) -> None:
         """Set up the tilemap layers and tiles."""
         # Background layer (mountains, parallax scrolling)
-        bg_config = TileLayerConfig(
-            z_index=0,
-            scroll_factor_x=0.5,
-            scroll_factor_y=0.5
-        )
+        bg_config = TileLayerConfig(z_index=0, scroll_factor_x=0.5, scroll_factor_y=0.5)
         self.tilemap.add_layer("background", 40, 30, bg_config)  # Doubled size
         bg_layer = self.tilemap.get_layer("background")
         bg_layer.fill(0)  # Mountain tile
@@ -121,17 +116,16 @@ class Game:
                     ground_layer.set_tile(x, y, 2)  # Ground top tile
 
         # Decoration layer (semi-transparent)
-        deco_config = TileLayerConfig(
-            z_index=3,
-            opacity=192
-        )
+        deco_config = TileLayerConfig(z_index=3, opacity=192)
         self.tilemap.add_layer("decoration", 40, 30, deco_config)  # Doubled size
         deco_layer = self.tilemap.get_layer("decoration")
 
         # Add decorative tiles in a more interesting pattern
         for x in range(40):
             if x % 4 == 0:  # More frequent trees
-                tree_y = 19 + int(3 * math.sin(x * 0.5))  # Place trees on the wavy ground
+                tree_y = 19 + int(
+                    3 * math.sin(x * 0.5)
+                )  # Place trees on the wavy ground
                 deco_layer.set_tile(x, tree_y - 1, 3)  # Tree tile
 
     def handle_events(self) -> None:
@@ -178,26 +172,22 @@ class Game:
         self.window.clear((100, 150, 255))  # Sky blue
 
         # Render tilemap
-        self.tilemap.render(
-            self.window.surface,
-            int(self.camera_x),
-            int(self.camera_y)
-        )
+        self.tilemap.render(self.window.surface, int(self.camera_x), int(self.camera_y))
 
         # Draw FPS
         fps_text = self.font.render(
-            f"FPS: {self.game_loop.metrics.fps:.1f}",
-            True,
-            (255, 255, 255)
+            f"FPS: {self.game_loop.metrics.fps:.1f}", True, (255, 255, 255)
         )
         self.window.surface.blit(fps_text, (10, 10))
 
         # Present the frame
         self.window.present()
 
+
 def main() -> None:
     game = Game()
     game.game_loop.run()
+
 
 if __name__ == "__main__":
     main()

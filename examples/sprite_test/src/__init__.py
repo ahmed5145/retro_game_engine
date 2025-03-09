@@ -1,32 +1,33 @@
 """Example demonstrating the sprite system features."""
-import os
 import math
+import os
+
 import pygame
+
 from src.core import (
-    Window, WindowConfig,
-    GameLoop, GameLoopConfig,
+    GameLoop,
+    GameLoopConfig,
     InputManager,
-    Sprite, SpriteSheet, SpriteFrame, SpriteConfig,
-    SpriteRenderer
+    Sprite,
+    SpriteConfig,
+    SpriteFrame,
+    SpriteRenderer,
+    SpriteSheet,
+    Window,
+    WindowConfig,
 )
+
 
 class Game:
     def __init__(self) -> None:
         # Initialize window
         window_config = WindowConfig(
-            title="Sprite System Example",
-            width=640,
-            height=480,
-            scale=1,
-            vsync=True
+            title="Sprite System Example", width=640, height=480, scale=1, vsync=True
         )
         self.window = Window(window_config)
 
         # Initialize game loop
-        loop_config = GameLoopConfig(
-            target_fps=60,
-            fixed_update_fps=50
-        )
+        loop_config = GameLoopConfig(target_fps=60, fixed_update_fps=50)
         self.game_loop = GameLoop(loop_config)
 
         # Initialize input
@@ -51,9 +52,7 @@ class Game:
 
         # Background sprite (z-index 0)
         bg_config = SpriteConfig(
-            x=0, y=0,
-            scale_x=20, scale_y=15,  # Scale to fill screen
-            z_index=0
+            x=0, y=0, scale_x=20, scale_y=15, z_index=0  # Scale to fill screen
         )
         bg_sprite = Sprite(sprite_sheet, bg_config)
         bg_sprite.set_frame(0)  # Use first frame as background
@@ -62,11 +61,7 @@ class Game:
 
         # Character sprites (z-index 1)
         for i in range(4):
-            config = SpriteConfig(
-                x=160 + i * 100,
-                y=240,
-                z_index=1
-            )
+            config = SpriteConfig(x=160 + i * 100, y=240, z_index=1)
             sprite = Sprite(sprite_sheet, config)
             sprite.set_frame(i + 1)  # Use different frames
             self.sprite_renderer.add_sprite(sprite)
@@ -128,18 +123,18 @@ class Game:
 
         # Draw FPS
         fps_text = self.font.render(
-            f"FPS: {self.game_loop.metrics.fps:.1f}",
-            True,
-            (255, 255, 255)
+            f"FPS: {self.game_loop.metrics.fps:.1f}", True, (255, 255, 255)
         )
         self.window.surface.blit(fps_text, (10, 10))
 
         # Present the frame
         self.window.present()
 
+
 def main() -> None:
     game = Game()
     game.game_loop.run()
+
 
 if __name__ == "__main__":
     main()

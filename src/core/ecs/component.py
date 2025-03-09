@@ -1,5 +1,5 @@
 """Base component class for the Entity Component System."""
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .entity import Entity
@@ -19,22 +19,38 @@ class Component:
 
     @property
     def entity(self) -> "Entity | None":
-        """Get the entity this component is attached to."""
+        """Get the entity this component is attached to.
+
+        Returns:
+            The entity this component is attached to, or None if not attached
+        """
         return self._entity
 
     @entity.setter
     def entity(self, value: "Entity | None") -> None:
-        """Set the entity this component is attached to."""
+        """Set the entity this component is attached to.
+
+        Args:
+            value: The entity to attach this component to
+        """
         self._entity = value
 
     @property
     def enabled(self) -> bool:
-        """Check if the component is enabled."""
+        """Get whether the component is enabled.
+
+        Returns:
+            True if the component is enabled, False otherwise
+        """
         return self._enabled
 
     @enabled.setter
     def enabled(self, value: bool) -> None:
-        """Enable or disable the component."""
+        """Set whether the component is enabled.
+
+        Args:
+            value: True to enable the component, False to disable it
+        """
         self._enabled = value
 
     def on_attach(self) -> None:
@@ -46,5 +62,9 @@ class Component:
         pass
 
     def __repr__(self) -> str:
-        """Get string representation of the component."""
+        """Get string representation of the component.
+
+        Returns:
+            String representation of the component
+        """
         return f"{self.__class__.__name__}(enabled={self._enabled})"

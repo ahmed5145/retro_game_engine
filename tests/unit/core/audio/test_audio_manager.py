@@ -1,12 +1,14 @@
 """Tests for the AudioManager class."""
-import pygame
 import pytest
 
 from src.core.audio import AudioConfig, AudioManager
-from tests.unit.core.audio.test_utils import (  # Import fixtures
-    setup_audio,
-    test_audio_file,
-)
+from tests.unit.core.audio.test_utils import setup_audio
+
+
+@pytest.fixture(autouse=True)
+def _setup_audio() -> None:
+    """Set up audio for testing."""
+    setup_audio()
 
 
 @pytest.fixture

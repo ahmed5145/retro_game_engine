@@ -1,10 +1,13 @@
 from dataclasses import dataclass
 from typing import Tuple
+
 import pygame
+
 
 @dataclass
 class WindowConfig:
     """Configuration for the game window."""
+
     title: str
     width: int
     height: int
@@ -12,15 +15,16 @@ class WindowConfig:
     vsync: bool = True
     fullscreen: bool = False
 
+
 class Window:
     """Manages the game window and provides basic rendering functionality."""
 
     def __init__(self, config: WindowConfig):
         """Initialize the window with the given configuration.
-        
+
         Args:
             config: WindowConfig object containing window settings
-            
+
         Raises:
             ValueError: If width, height or scale are invalid
         """
@@ -48,16 +52,14 @@ class Window:
             flags |= pygame.FULLSCREEN
 
         self.display_surface = pygame.display.set_mode(
-            (self.width * self.scale, self.height * self.scale),
-            flags,
-            vsync=self.vsync
+            (self.width * self.scale, self.height * self.scale), flags, vsync=self.vsync
         )
 
         pygame.display.set_caption(self.title)
 
     def clear(self, color: Tuple[int, int, int] = (0, 0, 0)) -> None:
         """Clear the window with the specified color.
-        
+
         Args:
             color: RGB tuple specifying the clear color (default: black)
         """
@@ -69,14 +71,14 @@ class Window:
         pygame.transform.scale(
             self.surface,
             (self.width * self.scale, self.height * self.scale),
-            self.display_surface
+            self.display_surface,
         )
         # Update the display
         pygame.display.flip()
 
     def set_title(self, title: str) -> None:
         """Set the window title.
-        
+
         Args:
             title: New window title
         """

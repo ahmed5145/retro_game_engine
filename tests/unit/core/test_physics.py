@@ -1,6 +1,8 @@
 """Tests for the physics system."""
 import pytest
-from src.core.physics import Vector2D, PhysicsConfig, PhysicsState, PhysicsBody
+
+from src.core.physics import PhysicsBody, PhysicsConfig, PhysicsState, Vector2D
+
 
 def test_vector_operations() -> None:
     """Test vector arithmetic operations."""
@@ -31,10 +33,12 @@ def test_vector_operations() -> None:
     with pytest.raises(ValueError):
         v1 / 0.0
 
+
 def test_vector_magnitude() -> None:
     """Test vector magnitude calculation."""
     v = Vector2D(3.0, 4.0)
     assert v.magnitude() == 5.0  # 3-4-5 triangle
+
 
 def test_vector_normalize() -> None:
     """Test vector normalization."""
@@ -48,6 +52,7 @@ def test_vector_normalize() -> None:
     assert normalized.x == 0.0
     assert normalized.y == 0.0
 
+
 def test_vector_clamp() -> None:
     """Test vector magnitude clamping."""
     v = Vector2D(3.0, 4.0)  # Magnitude 5
@@ -60,6 +65,7 @@ def test_vector_clamp() -> None:
     assert clamped.x == 1.0
     assert clamped.y == 0.0
 
+
 def test_physics_config() -> None:
     """Test physics configuration."""
     config = PhysicsConfig()
@@ -68,6 +74,7 @@ def test_physics_config() -> None:
     assert config.max_velocity.y > 0
     assert 0 <= config.friction <= 1
     assert config.bounce >= 0
+
 
 def test_physics_state() -> None:
     """Test physics state initialization."""
@@ -80,12 +87,14 @@ def test_physics_state() -> None:
     assert state.acceleration.y == 0.0
     assert not state.grounded
 
+
 def test_physics_body_initialization() -> None:
     """Test physics body initialization."""
     config = PhysicsConfig()
     body = PhysicsBody(config)
     assert body.config == config
     assert isinstance(body.state, PhysicsState)
+
 
 def test_physics_apply_force() -> None:
     """Test applying forces to physics body."""
@@ -94,6 +103,7 @@ def test_physics_apply_force() -> None:
     body.apply_force(force)
     assert body.state.acceleration.x == 10.0
     assert body.state.acceleration.y == -20.0
+
 
 def test_physics_set_velocity() -> None:
     """Test setting velocity with clamping."""
@@ -110,12 +120,11 @@ def test_physics_set_velocity() -> None:
     assert body.state.velocity.x == 100.0  # Clamped to max
     assert body.state.velocity.y == 100.0  # Clamped to max
 
+
 def test_physics_update() -> None:
     """Test physics update step."""
     config = PhysicsConfig(
-        gravity=Vector2D(0.0, 10.0),
-        max_velocity=Vector2D(100.0, 100.0),
-        friction=0.5
+        gravity=Vector2D(0.0, 10.0), max_velocity=Vector2D(100.0, 100.0), friction=0.5
     )
     body = PhysicsBody(config)
 
@@ -129,6 +138,7 @@ def test_physics_update() -> None:
     body.state.grounded = True
     body.update(1.0)
     assert body.state.velocity.x < 10.0  # Should decrease due to friction
+
 
 def test_physics_collision() -> None:
     """Test collision response."""
@@ -154,13 +164,14 @@ def test_physics_collision() -> None:
     body.handle_collision(normal, 0.0)  # Another collision with no penetration
     assert body.state.grounded  # Now should be grounded since not bouncing
 
+
 def test_physics_integration() -> None:
     """Test complete physics integration."""
     config = PhysicsConfig(
         gravity=Vector2D(0.0, 10.0),
         max_velocity=Vector2D(100.0, 100.0),
         friction=0.5,
-        bounce=0.5
+        bounce=0.5,
     )
     body = PhysicsBody(config)
 
@@ -174,4 +185,4 @@ def test_physics_integration() -> None:
     # Object should have moved and been affected by gravity
     assert body.state.position.x > 0
     assert body.state.position.y != 0
-    assert body.state.velocity.y > -10.0  # Should have slowed down upward velocity 
+    assert body.state.velocity.y > -10.0  # Should have slowed down upward velocity

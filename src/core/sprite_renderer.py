@@ -1,7 +1,10 @@
 """Sprite rendering system with batching and z-ordering."""
-from typing import List, Dict
+from typing import Dict, List
+
 import pygame
+
 from .sprite import Sprite
+
 
 class SpriteRenderer:
     """Handles efficient rendering of multiple sprites with z-ordering."""
@@ -12,7 +15,7 @@ class SpriteRenderer:
 
     def add_sprite(self, sprite: Sprite) -> None:
         """Add a sprite to be rendered.
-        
+
         Args:
             sprite: Sprite to add
         """
@@ -23,7 +26,7 @@ class SpriteRenderer:
 
     def remove_sprite(self, sprite: Sprite) -> None:
         """Remove a sprite from rendering.
-        
+
         Args:
             sprite: Sprite to remove
         """
@@ -39,7 +42,7 @@ class SpriteRenderer:
 
     def render(self, surface: pygame.Surface) -> None:
         """Render all sprites in order of z-index.
-        
+
         Args:
             surface: Surface to render to
         """

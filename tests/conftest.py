@@ -1,7 +1,10 @@
 """Pytest configuration and fixtures."""
 from typing import Generator
-import pytest
+
 import pygame
+import pytest
+
+
 @pytest.fixture(autouse=True)
 def pygame_init() -> Generator[None, None, None]:
     """Initialize pygame before each test."""

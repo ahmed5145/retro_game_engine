@@ -1,11 +1,12 @@
 """Platformer example game using the Entity Component System."""
 import os
 import sys
+from typing import List
 
 import pygame
 
 from examples.platformer.components import BoxCollider, Physics, PlayerController
-from examples.platformer.systems import collision_system, physics_system, player_system
+from examples.platformer.systems import PhysicsSystem, collision_system, player_system
 from src.core.ecs import World
 from src.core.ecs.components import SpriteRenderer, Transform
 from src.core.sprite import Sprite, SpriteConfig, SpriteFrame, SpriteSheet
@@ -26,6 +27,7 @@ class PlatformerGame:
         self.world = World()
         self.running = True
         self.clock = pygame.time.Clock()
+        self.physics_system = PhysicsSystem()
 
         # Load sprites
         self.sprite_sheet = self._load_sprites()
@@ -53,15 +55,16 @@ class PlatformerGame:
         """Set up the initial game state."""
         # Create player
         player = self.world.create_entity("player")
-        player.add_component(Transform(position=Vector2D(400, 300)))
-        player.add_component(PlayerController())
-        player.add_component(Physics())
-        player.add_component(BoxCollider(width=32, height=32))
+        if player:  # Type guard
+            player.add_component(Transform(position=Vector2D(400, 300)))
+            player.add_component(PlayerController())
+            player.add_component(Physics())
+            player.add_component(BoxCollider(width=32, height=32))
 
-        # Add player sprite
-        player_sprite = Sprite(self.sprite_sheet)
-        player_sprite.set_frame(0)  # Use first frame for player
-        player.add_component(SpriteRenderer(sprite=player_sprite))
+            # Add player sprite
+            player_sprite = Sprite(self.sprite_sheet)
+            player_sprite.set_frame(0)  # Use first frame for player
+            player.add_component(SpriteRenderer(sprite=player_sprite))
 
         # Create ground
         self.create_platform(400, 500, 800, 32)  # Ground
@@ -80,16 +83,19 @@ class PlatformerGame:
             height: Platform height
         """
         platform = self.world.create_entity("platform")
-        platform.add_component(Transform(position=Vector2D(x, y)))
-        platform.add_component(BoxCollider(width=width, height=height, is_static=True))
+        if platform:  # Type guard
+            platform.add_component(Transform(position=Vector2D(x, y)))
+            platform.add_component(
+                BoxCollider(width=width, height=height, is_static=True)
+            )
 
-        # Add sprite renderer with proper scaling
-        sprite = Sprite(self.sprite_sheet)
-        sprite.set_frame(1)  # Use second frame for platform
-        renderer = SpriteRenderer(sprite=sprite)
-        renderer.config.scale_x = width / 32  # Scale to match collider width
-        renderer.config.scale_y = height / 32  # Scale to match collider height
-        platform.add_component(renderer)
+            # Add sprite renderer with proper scaling
+            sprite = Sprite(self.sprite_sheet)
+            sprite.set_frame(1)  # Use second frame for platform
+            renderer = SpriteRenderer(sprite=sprite)
+            renderer.config.scale_x = width / 32  # Scale to match collider width
+            renderer.config.scale_y = height / 32  # Scale to match collider height
+            platform.add_component(renderer)
 
     def handle_events(self) -> None:
         """Handle pygame events."""
@@ -106,7 +112,7 @@ class PlatformerGame:
 
         # Run systems
         player_system(self.world, dt)
-        physics_system(self.world, dt)
+        self.physics_system.update(self.world, dt)
         collision_system(self.world, dt)
 
     def render(self) -> None:
@@ -115,13 +121,25 @@ class PlatformerGame:
         self.window.clear((100, 100, 255))  # Sky blue background
 
         # Get all sprite renderers
-        renderers = []
+        renderers: List[SpriteRenderer] = []
         for entity in self.world._entities.values():
-            if renderer := entity.get_component(SpriteRenderer):
+            if not entity:
+                continue
+            renderer = entity.get_component(SpriteRenderer)
+            transform = entity.get_component(Transform)
+            if renderer and transform:
                 renderers.append(renderer)
 
         # Sort by Y position for basic depth
-        renderers.sort(key=lambda r: r.entity.get_component(Transform).position.y)
+        def get_y_position(renderer: SpriteRenderer) -> float:
+            if not renderer.entity:
+                return 0.0
+            transform = renderer.entity.get_component(Transform)
+            if not transform:
+                return 0.0
+            return transform.position.y
+
+        renderers.sort(key=get_y_position)
 
         # Render all sprites
         for renderer in renderers:

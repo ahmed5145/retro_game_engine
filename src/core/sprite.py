@@ -1,19 +1,24 @@
 """Core sprite system implementation."""
 from dataclasses import dataclass
-from typing import Tuple, List, Optional
+from typing import List, Optional, Tuple
+
 import pygame
+
 
 @dataclass
 class SpriteFrame:
     """A single frame from a sprite sheet."""
+
     x: int
     y: int
     width: int
     height: int
 
+
 @dataclass
 class SpriteConfig:
     """Configuration for a sprite."""
+
     x: float = 0.0
     y: float = 0.0
     scale_x: float = 1.0
@@ -24,15 +29,16 @@ class SpriteConfig:
     alpha: int = 255
     z_index: int = 0
 
+
 class SpriteSheet:
     """Manages a sprite sheet texture and its frames."""
 
     def __init__(self, texture_path: str):
         """Initialize the sprite sheet.
-        
+
         Args:
             texture_path: Path to the sprite sheet image
-            
+
         Raises:
             FileNotFoundError: If texture file doesn't exist
             pygame.error: If texture file is invalid
@@ -42,36 +48,41 @@ class SpriteSheet:
 
     def add_frame(self, frame: SpriteFrame) -> int:
         """Add a frame to the sprite sheet.
-        
+
         Args:
             frame: Frame to add
-            
+
         Returns:
             Index of the added frame
-            
+
         Raises:
             ValueError: If frame coordinates are invalid
         """
         # Validate frame bounds
-        if (frame.x < 0 or frame.y < 0 or
-            frame.width <= 0 or frame.height <= 0 or
-            frame.x + frame.width > self.texture.get_width() or
-            frame.y + frame.height > self.texture.get_height()):
+        if (
+            frame.x < 0
+            or frame.y < 0
+            or frame.width <= 0
+            or frame.height <= 0
+            or frame.x + frame.width > self.texture.get_width()
+            or frame.y + frame.height > self.texture.get_height()
+        ):
             raise ValueError("Invalid frame coordinates")
 
         self.frames.append(frame)
         return len(self.frames) - 1
 
-    def add_frames_grid(self, frame_width: int, frame_height: int,
-                       margin: int = 0, spacing: int = 0) -> None:
+    def add_frames_grid(
+        self, frame_width: int, frame_height: int, margin: int = 0, spacing: int = 0
+    ) -> None:
         """Add frames in a grid layout.
-        
+
         Args:
             frame_width: Width of each frame
             frame_height: Height of each frame
             margin: Margin around the frames (default: 0)
             spacing: Spacing between frames (default: 0)
-            
+
         Raises:
             ValueError: If frame size or spacing is invalid
         """
@@ -84,8 +95,10 @@ class SpriteSheet:
         texture_height = self.texture.get_height()
 
         # Validate that at least one frame will fit
-        if (margin * 2 + frame_width > texture_width or
-            margin * 2 + frame_height > texture_height):
+        if (
+            margin * 2 + frame_width > texture_width
+            or margin * 2 + frame_height > texture_height
+        ):
             raise ValueError("Frame dimensions with margin exceed texture size")
 
         x = margin
@@ -98,12 +111,15 @@ class SpriteSheet:
             x = margin
             y += frame_height + spacing
 
+
 class Sprite:
     """A drawable sprite with transform and animation capabilities."""
 
-    def __init__(self, sprite_sheet: SpriteSheet, config: Optional[SpriteConfig] = None):
+    def __init__(
+        self, sprite_sheet: SpriteSheet, config: Optional[SpriteConfig] = None
+    ):
         """Initialize the sprite.
-        
+
         Args:
             sprite_sheet: SpriteSheet containing the sprite's frames
             config: Initial configuration (default: None)
@@ -114,10 +130,10 @@ class Sprite:
 
     def set_frame(self, frame_index: int) -> None:
         """Set the current frame.
-        
+
         Args:
             frame_index: Index of the frame to display
-            
+
         Raises:
             IndexError: If frame_index is out of range
         """
@@ -127,7 +143,7 @@ class Sprite:
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the sprite to a surface.
-        
+
         Args:
             surface: Surface to draw on
         """
@@ -141,15 +157,13 @@ class Sprite:
         frame_surface.blit(
             self.sprite_sheet.texture,
             (0, 0),
-            (frame.x, frame.y, frame.width, frame.height)
+            (frame.x, frame.y, frame.width, frame.height),
         )
 
         # Apply transformations
         if self.config.flip_x or self.config.flip_y:
             frame_surface = pygame.transform.flip(
-                frame_surface,
-                self.config.flip_x,
-                self.config.flip_y
+                frame_surface, self.config.flip_x, self.config.flip_y
             )
 
         if self.config.rotation != 0:
@@ -160,15 +174,11 @@ class Sprite:
             new_height = int(frame.height * abs(self.config.scale_y))
             if new_width > 0 and new_height > 0:
                 frame_surface = pygame.transform.scale(
-                    frame_surface,
-                    (new_width, new_height)
+                    frame_surface, (new_width, new_height)
                 )
 
         if self.config.alpha != 255:
             frame_surface.set_alpha(self.config.alpha)
 
         # Draw to the target surface
-        surface.blit(
-            frame_surface,
-            (int(self.config.x), int(self.config.y))
-        )
+        surface.blit(frame_surface, (int(self.config.x), int(self.config.y)))

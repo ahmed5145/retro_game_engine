@@ -18,4 +18,4 @@ good-names=i,j,k,ex,Run,_,x,y,dx,dy,id
 
 [TYPECHECK]
 # List of module names for which member attributes should not be checked
-ignored-modules=pygame 
+ignored-modules=pygame

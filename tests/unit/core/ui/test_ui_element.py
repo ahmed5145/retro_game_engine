@@ -29,20 +29,25 @@ def test_ui_element_initialization(ui_element: UIElement) -> None:
     assert ui_element.parent is None
 
 
-def test_ui_element_parent_child_relationship(
-    ui_element: UIElement, child_element: UIElement
-) -> None:
-    """Test parent-child relationship management."""
+def test_ui_element_add_child(ui_element: UIElement, child_element: UIElement) -> None:
+    """Test adding a child to a UI element."""
     # Test adding child
     ui_element.add_child(child_element)
     assert child_element.parent == ui_element
     assert child_element in ui_element._children
 
+
+def test_ui_element_remove_child(
+    ui_element: UIElement, child_element: UIElement
+) -> None:
+    """Test removing a child from a UI element."""
+    # Setup
+    ui_element.add_child(child_element)
+
     # Test removing child
-    if child_element.parent == ui_element:
-        ui_element.remove_child(child_element)
-        assert child_element.parent is None
-        assert child_element not in ui_element._children
+    ui_element.remove_child(child_element)
+    assert child_element.parent is None
+    assert child_element not in ui_element._children
 
 
 def test_ui_element_visibility(ui_element: UIElement) -> None:

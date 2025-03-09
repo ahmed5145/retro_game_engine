@@ -4,7 +4,7 @@ import sys
 
 import pygame
 
-from src.core.ui import Button, Text, TextConfig, UIElement, UIRect
+from src.core.ui import Button, ButtonStyle, Text, TextConfig, UIElement, UIRect
 from src.core.window import Window, WindowConfig
 
 
@@ -47,7 +47,6 @@ class UIDemo:
             font_size=24,
             color=(200, 200, 255),
             align="center",
-            animation_speed=20,  # 20 characters per second
             shadow_offset=(1, 1),
         )
         animated_text = Text(
@@ -62,15 +61,19 @@ class UIDemo:
             ),
             config=text_config,
         )
+        # Set animation speed after creation
+        text_config.animation_speed = 20  # 20 characters per second
         self.ui_root.add_child(animated_text)
 
-        # Button text configuration
-        button_text_config = TextConfig(
-            font_size=20,
-            color=(220, 220, 255),  # Slightly blue-tinted white
-            align="center",
-            shadow_offset=(1, 1),  # Add text shadow for better readability
-            shadow_color=(20, 20, 40),
+        # Button style configuration
+        button_style = ButtonStyle(
+            background_color=(40, 40, 80),
+            hover_color=(60, 60, 100),
+            pressed_color=(30, 30, 60),
+            border_color=(80, 80, 120),
+            border_width=2,
+            corner_radius=5,
+            padding=(10, 5, 10, 5),
         )
 
         # Start button
@@ -84,11 +87,9 @@ class UIDemo:
                 anchor_x=0.5,  # Center anchor point
                 anchor_y=0.0,  # Top anchor
             ),
-            text_config=button_text_config,
-            color=(40, 40, 80),
-            hover_color=(60, 60, 100),
-            on_click=lambda: print("Start clicked!"),
+            style=button_style,
         )
+        start_button.on_click = lambda: print("Start clicked!")
         self.ui_root.add_child(start_button)
 
         # Settings button
@@ -102,11 +103,9 @@ class UIDemo:
                 anchor_x=0.5,  # Center anchor point
                 anchor_y=0.0,  # Top anchor
             ),
-            text_config=button_text_config,
-            color=(40, 40, 80),
-            hover_color=(60, 60, 100),
-            on_click=lambda: print("Settings clicked!"),
+            style=button_style,
         )
+        settings_button.on_click = lambda: print("Settings clicked!")
         self.ui_root.add_child(settings_button)
 
         # Quit button
@@ -120,11 +119,9 @@ class UIDemo:
                 anchor_x=0.5,  # Center anchor point
                 anchor_y=0.0,  # Top anchor
             ),
-            text_config=button_text_config,
-            color=(40, 40, 80),
-            hover_color=(60, 60, 100),
-            on_click=self.quit,
+            style=button_style,
         )
+        quit_button.on_click = self.quit
         self.ui_root.add_child(quit_button)
 
     def handle_events(self) -> None:

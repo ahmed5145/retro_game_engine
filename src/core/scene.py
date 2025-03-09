@@ -1,18 +1,21 @@
 """Scene management system for the game engine."""
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 import pygame
+
 from .ecs import World
+
 
 class Scene:
     """A scene represents a distinct state in the game (level, menu, etc.).
-    
+
     Scenes manage their own World instance and provide lifecycle methods for
     initialization, cleanup, and state management.
     """
 
     def __init__(self, name: str = "") -> None:
         """Initialize the scene.
-        
+
         Args:
             name: Optional name for the scene (default: "")
         """
@@ -40,7 +43,7 @@ class Scene:
 
     def initialize(self) -> None:
         """Initialize the scene.
-        
+
         This is called once when the scene is first created.
         Override this to set up your scene.
         """
@@ -48,7 +51,7 @@ class Scene:
 
     def load(self) -> None:
         """Load scene resources.
-        
+
         Called when the scene becomes active.
         Override this to load assets, create entities, etc.
         """
@@ -57,7 +60,7 @@ class Scene:
 
     def unload(self) -> None:
         """Unload scene resources.
-        
+
         Called when the scene becomes inactive.
         Override this to clean up resources.
         """
@@ -67,21 +70,21 @@ class Scene:
 
     def pause(self) -> None:
         """Pause the scene.
-        
+
         Called when another scene is pushed on top of this one.
         """
         self._paused = True
 
     def resume(self) -> None:
         """Resume the scene.
-        
+
         Called when this scene becomes active again after being paused.
         """
         self._paused = False
 
     def update(self, dt: float) -> None:
         """Update the scene.
-        
+
         Args:
             dt: Delta time in seconds
         """
@@ -90,7 +93,7 @@ class Scene:
 
     def render(self, surface: pygame.Surface) -> None:
         """Render the scene.
-        
+
         Args:
             surface: Surface to render to
         """
@@ -98,7 +101,7 @@ class Scene:
 
     def set_environment_variable(self, key: str, value: Any) -> None:
         """Set a scene-specific environment variable.
-        
+
         Args:
             key: Variable name
             value: Variable value
@@ -107,12 +110,12 @@ class Scene:
 
     def get_environment_variable(self, key: str, default: Any = None) -> Any:
         """Get a scene-specific environment variable.
-        
+
         Args:
             key: Variable name
             default: Default value if key doesn't exist
-            
+
         Returns:
             Variable value or default
         """
-        return self._environment_vars.get(key, default) 
+        return self._environment_vars.get(key, default)

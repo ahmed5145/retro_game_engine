@@ -1,5 +1,5 @@
 """Entity class for the Entity Component System."""
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Dict, Optional, Type, TypeVar
 from uuid import uuid4
 
 from .component import Component
@@ -8,49 +8,56 @@ T = TypeVar("T", bound=Component)
 
 
 class Entity:
-    """An entity in the game world.
+    """Base class for all game entities.
 
-    Entities are containers for components that define their behavior and properties.
-    They have no functionality of their own and serve primarily as an ID to group
-    related components together.
+    An entity is a container for components that define its behavior and data.
+    Each entity has a unique ID and can be part of a parent-child hierarchy.
     """
 
     def __init__(self, name: str = "") -> None:
         """Initialize the entity.
 
         Args:
-            name: Optional name for the entity (default: "")
+            name: Optional name for the entity (default: auto-generated)
         """
-        self.id = str(uuid4())  # Unique identifier
+        self.id = str(uuid4())
         self.name = name or f"Entity_{self.id[:8]}"
         self._components: Dict[Type[Component], Component] = {}
-        self._enabled: bool = True
-        self._parent: Optional["Entity"] = None
         self._children: Dict[str, "Entity"] = {}
+        self._parent: Optional["Entity"] = None
+        self._enabled: bool = True
 
     @property
     def enabled(self) -> bool:
-        """Check if the entity is enabled."""
+        """Get whether the entity is enabled.
+
+        Returns:
+            True if the entity is enabled, False otherwise
+        """
         return self._enabled
 
     @enabled.setter
     def enabled(self, value: bool) -> None:
-        """Enable or disable the entity."""
+        """Set whether the entity is enabled.
+
+        Args:
+            value: True to enable the entity, False to disable it
+        """
         self._enabled = value
 
     def add_component(self, component: Component) -> None:
         """Add a component to the entity.
 
         Args:
-            component: Component instance to add
+            component: Component to add
 
         Raises:
-            ValueError: If component type is already attached
+            ValueError: If a component of the same type already exists
         """
         component_type = type(component)
         if component_type in self._components:
             raise ValueError(
-                f"Entity already has component of type {component_type.__name__}"
+                f"Entity '{self.name}' already has a {component_type.__name__}"
             )
 
         self._components[component_type] = component
@@ -70,52 +77,53 @@ class Entity:
             del self._components[component_type]
 
     def get_component(self, component_type: Type[T]) -> Optional[T]:
-        """Get a component of the specified type.
+        """Get a component by type.
 
         Args:
             component_type: Type of component to get
 
         Returns:
-            Component instance if found, None otherwise
+            The component if found, None otherwise
         """
         return self._components.get(component_type)  # type: ignore
 
     def has_component(self, component_type: Type[Component]) -> bool:
-        """Check if entity has a component of the specified type.
+        """Check if the entity has a component of the given type.
 
         Args:
             component_type: Type of component to check for
 
         Returns:
-            True if entity has component, False otherwise
+            True if the entity has the component, False otherwise
         """
         return component_type in self._components
 
     def set_parent(self, parent: Optional["Entity"]) -> None:
-        """Set the parent entity.
+        """Set the parent of this entity.
 
         Args:
-            parent: Parent entity or None to clear parent
+            parent: Entity to set as parent, or None to remove parent
         """
         if self._parent == parent:
             return
 
         # Remove from old parent
-        if self._parent is not None:
-            self._parent._children.pop(self.id, None)
+        if self._parent:
+            self._parent.remove_child(self)
 
         # Set new parent
         self._parent = parent
-        if parent is not None:
-            parent._children[self.id] = self
+        if parent:
+            parent.add_child(self)
 
     def add_child(self, child: "Entity") -> None:
         """Add a child entity.
 
         Args:
-            child: Entity to add as child
+            child: Entity to add as a child
         """
-        child.set_parent(self)
+        self._children[child.id] = child
+        child._parent = self
 
     def remove_child(self, child: "Entity") -> None:
         """Remove a child entity.
@@ -124,19 +132,36 @@ class Entity:
             child: Entity to remove
         """
         if child.id in self._children:
-            child.set_parent(None)
+            del self._children[child.id]
+            child._parent = None
 
     @property
     def parent(self) -> Optional["Entity"]:
-        """Get the parent entity."""
+        """Get the parent entity.
+
+        Returns:
+            The parent entity, or None if no parent
+        """
         return self._parent
 
     @property
     def children(self) -> Dict[str, "Entity"]:
-        """Get all child entities."""
-        return self._children.copy()
+        """Get the dictionary of child entities.
+
+        Returns:
+            Dictionary of child entities, keyed by their IDs
+        """
+        return self._children
 
     def __repr__(self) -> str:
-        """Get string representation of the entity."""
-        components = ", ".join(c.__class__.__name__ for c in self._components.values())
-        return f"Entity(name='{self.name}', components=[{components}])"
+        """Get string representation of the entity.
+
+        Returns:
+            String representation of the entity
+        """
+        return (
+            f"{self.__class__.__name__}("
+            f"name='{self.name}', "
+            f"id='{self.id}', "
+            f"enabled={self._enabled})"
+        )

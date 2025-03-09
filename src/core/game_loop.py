@@ -1,22 +1,26 @@
-from dataclasses import dataclass
+"""Game loop implementation for managing game timing and updates."""
 import time
-from typing import Callable, Optional, List, Dict
-from collections import deque
+from dataclasses import dataclass
+from typing import Callable, List, Optional
+
 
 @dataclass
 class GameLoopConfig:
     """Configuration for the game loop."""
+
     target_fps: int
     fixed_update_fps: int
-    max_frame_time: float = 0.25  # Maximum time between frames to prevent spiral of death
-    fps_sample_size: int = 60  # Number of frames to average for FPS calculation
+    max_frame_time: float = 0.25  # Maximum time to prevent spiral of death
+    fps_sample_size: int = 60  # Number of frames for FPS calculation
+
 
 @dataclass
 class PerformanceMetrics:
     """Performance metrics for the game loop."""
+
     fps: float = 0.0
     frame_time: float = 0.0
-    min_frame_time: float = float('inf')
+    min_frame_time: float = float("inf")
     max_frame_time: float = 0.0
     avg_frame_time: float = 0.0
     fixed_update_time: float = 0.0
@@ -24,190 +28,240 @@ class PerformanceMetrics:
     render_time: float = 0.0
     idle_time: float = 0.0
 
+
 class GameLoop:
-    """
-    Game loop implementation using a fixed timestep for updates and variable timestep for rendering.
-    This provides consistent physics/game logic updates while allowing for smooth rendering.
+    """Manages the game loop with fixed and variable timestep updates.
+
+    The game loop handles timing, updates, and rendering with support for both
+    fixed timestep physics/logic updates and variable timestep rendering.
     """
 
     def __init__(self, config: GameLoopConfig):
-        """Initialize the game loop with the given configuration.
-        
+        """Initialize the game loop.
+
         Args:
-            config: GameLoopConfig object containing loop settings
-            
-        Raises:
-            ValueError: If target_fps or fixed_update_fps are invalid
+            config: Configuration for the game loop
         """
-        if config.target_fps <= 0:
-            raise ValueError("Target FPS must be positive")
-        if config.fixed_update_fps <= 0:
-            raise ValueError("Fixed update FPS must be positive")
+        self._config = config
+        self._is_running = False
+        self._last_time = 0.0
+        self._frame_times: List[float] = []
+        self._accumulator = 0.0
+        self._last_metrics_update = 0.0
+        self._metrics = PerformanceMetrics()
 
         self.target_fps = config.target_fps
         self.fixed_update_fps = config.fixed_update_fps
-        self.max_frame_time = config.max_frame_time
-
-        self.is_running = False
-        self.delta_time = 0.0  # Time since last frame
-        self.fixed_delta_time = 1.0 / self.fixed_update_fps  # Time between fixed updates
-
-        self._last_time = time.perf_counter()
-        self._accumulator = 0.0  # Accumulates time for fixed updates
-
-        # Performance monitoring
-        self._frame_times: deque = deque(maxlen=config.fps_sample_size)
-        self._metrics = PerformanceMetrics()
-        self._last_metrics_update = time.perf_counter()
-        self._metrics_update_interval = 0.5  # Update metrics every 0.5 seconds
-
-        # Timing breakdowns
-        self._frame_start = 0.0
-        self._phase_start = 0.0
+        self.fixed_update_time = 1.0 / config.fixed_update_fps
 
         # Callbacks
-        self._update: Optional[Callable[[], None]] = None
-        self._fixed_update: Optional[Callable[[], None]] = None
-        self._render: Optional[Callable[[], None]] = None
+        self._update_callback: Optional[Callable[[], None]] = None
+        self._fixed_update_callback: Optional[Callable[[], None]] = None
+        self._render_callback: Optional[Callable[[], None]] = None
+
+    @property
+    def is_running(self) -> bool:
+        """Get whether the game loop is currently running.
+
+        Returns:
+            bool: True if the game loop is running, False otherwise.
+        """
+        return self._is_running
+
+    @property
+    def max_frame_time(self) -> float:
+        """Get the maximum allowed frame time.
+
+        Returns:
+            float: The maximum frame time in seconds.
+        """
+        return self._config.max_frame_time
+
+    @property
+    def fixed_delta_time(self) -> float:
+        """Get the fixed update time step.
+
+        Returns:
+            float: The fixed update time step in seconds.
+        """
+        return self.fixed_update_time
+
+    @property
+    def accumulator(self) -> float:
+        """Get the fixed update accumulator.
+
+        Returns:
+            float: The current accumulator value in seconds.
+        """
+        return self._accumulator
+
+    @property
+    def last_metrics_update(self) -> float:
+        """Get the time of the last metrics update.
+
+        Returns:
+            float: The time of the last metrics update in seconds.
+        """
+        return self._last_metrics_update
+
+    @property
+    def last_time(self) -> float:
+        """Get the time of the last frame.
+
+        Returns:
+            float: The time of the last frame in seconds.
+        """
+        return self._last_time
 
     @property
     def metrics(self) -> PerformanceMetrics:
-        """Get the current performance metrics."""
+        """Get the current performance metrics.
+
+        Returns:
+            Current performance metrics
+        """
         return self._metrics
 
     @property
     def update(self) -> Optional[Callable[[], None]]:
-        """Get the update callback."""
-        return self._update
+        """Get the update callback.
+
+        Returns:
+            Current update callback or None
+        """
+        return self._update_callback
 
     @update.setter
     def update(self, callback: Callable[[], None]) -> None:
         """Set the update callback.
-        
+
         Args:
             callback: Function to call for variable timestep updates
         """
-        self._update = callback
+        self._update_callback = callback
 
     @property
     def fixed_update(self) -> Optional[Callable[[], None]]:
-        """Get the fixed update callback."""
-        return self._fixed_update
+        """Get the fixed update callback.
+
+        Returns:
+            Current fixed update callback or None
+        """
+        return self._fixed_update_callback
 
     @fixed_update.setter
     def fixed_update(self, callback: Callable[[], None]) -> None:
         """Set the fixed update callback.
-        
+
         Args:
             callback: Function to call for fixed timestep updates
         """
-        self._fixed_update = callback
+        self._fixed_update_callback = callback
 
     @property
     def render(self) -> Optional[Callable[[], None]]:
-        """Get the render callback."""
-        return self._render
+        """Get the render callback.
+
+        Returns:
+            Current render callback or None
+        """
+        return self._render_callback
 
     @render.setter
     def render(self, callback: Callable[[], None]) -> None:
         """Set the render callback.
-        
+
         Args:
             callback: Function to call for rendering
         """
-        self._render = callback
+        self._render_callback = callback
 
     def start(self) -> None:
         """Start the game loop."""
-        self.is_running = True
+        self._is_running = True
         self._last_time = time.perf_counter()
         self._accumulator = 0.0
-        self._frame_times.clear()
-        self._metrics = PerformanceMetrics()
 
     def stop(self) -> None:
         """Stop the game loop."""
-        self.is_running = False
+        self._is_running = False
 
     def _update_timing(self) -> None:
-        """Update timing variables for this frame."""
+        """Update timing calculations for this frame."""
         current_time = time.perf_counter()
         frame_time = current_time - self._last_time
         self._last_time = current_time
 
         # Clamp frame time to prevent spiral of death
-        self.delta_time = min(frame_time, self.max_frame_time)
-        self._accumulator += self.delta_time
+        frame_time = min(frame_time, self.max_frame_time)
 
-        # Update frame time statistics
+        # Update frame time history
         self._frame_times.append(frame_time)
+        if len(self._frame_times) > self._config.fps_sample_size:
+            self._frame_times.pop(0)
 
-        # Update metrics periodically
-        if current_time - self._last_metrics_update >= self._metrics_update_interval:
-            self._update_metrics()
-            self._last_metrics_update = current_time
+        # Update fixed update accumulator
+        self._accumulator += frame_time
 
     def _update_metrics(self) -> None:
         """Update performance metrics."""
-        if not self._frame_times:
-            return
-
-        # Calculate FPS and frame times
-        avg_frame_time = sum(self._frame_times) / len(self._frame_times)
-        self._metrics.fps = 1.0 / avg_frame_time if avg_frame_time > 0 else 0.0
-        self._metrics.frame_time = self._frame_times[-1]
-        self._metrics.min_frame_time = min(self._frame_times)
-        self._metrics.max_frame_time = max(self._frame_times)
-        self._metrics.avg_frame_time = avg_frame_time
+        if self._frame_times:
+            self._metrics.frame_time = self._frame_times[-1]
+            self._metrics.min_frame_time = min(self._frame_times)
+            self._metrics.max_frame_time = max(self._frame_times)
+            self._metrics.avg_frame_time = sum(self._frame_times) / len(
+                self._frame_times
+            )
+            self._metrics.fps = 1.0 / self._metrics.avg_frame_time
 
     def _start_timing(self) -> None:
-        """Start timing a phase of the game loop."""
-        self._phase_start = time.perf_counter()
+        """Start timing a section of the game loop."""
+        self._last_time = time.perf_counter()
 
     def _end_timing(self, metric_name: str) -> None:
-        """End timing a phase and update the corresponding metric.
-        
+        """End timing a section and update the corresponding metric.
+
         Args:
             metric_name: Name of the metric to update
         """
-        phase_time = time.perf_counter() - self._phase_start
-        setattr(self._metrics, metric_name, phase_time)
+        duration = time.perf_counter() - self._last_time
+        setattr(self._metrics, metric_name, duration)
 
     def _process_fixed_updates(self) -> None:
         """Process all pending fixed updates."""
         self._start_timing()
         while self._accumulator >= self.fixed_delta_time:
-            if self._fixed_update:
-                self._fixed_update()
+            if self._fixed_update_callback:
+                self._fixed_update_callback()
             self._accumulator -= self.fixed_delta_time
-        self._end_timing('fixed_update_time')
+        self._end_timing("fixed_update_time")
 
     def run_one_frame(self) -> None:
         """Run a single frame of the game loop."""
-        if not self.is_running:
-            return
+        self._last_time = time.perf_counter()
 
-        self._frame_start = time.perf_counter()
+        # Update timing
         self._update_timing()
+        self._update_metrics()
 
-        # Process fixed updates
+        # Fixed update
         self._process_fixed_updates()
 
-        # Process variable update
+        # Variable update
         self._start_timing()
-        if self._update:
-            self._update()
-        self._end_timing('update_time')
+        if self._update_callback:
+            self._update_callback()
+        self._end_timing("update_time")
 
         # Render
         self._start_timing()
-        if self._render:
-            self._render()
-        self._end_timing('render_time')
+        if self._render_callback:
+            self._render_callback()
+        self._end_timing("render_time")
 
         # Calculate idle time
         frame_end = time.perf_counter()
-        total_frame_time = frame_end - self._frame_start
+        total_frame_time = frame_end - self._last_time
         target_frame_time = 1.0 / self.target_fps
         self._metrics.idle_time = max(0.0, target_frame_time - total_frame_time)
 
@@ -216,7 +270,7 @@ class GameLoop:
         self.start()
 
         try:
-            while self.is_running:
+            while self._is_running:
                 self.run_one_frame()
 
                 # Sleep to maintain target frame rate

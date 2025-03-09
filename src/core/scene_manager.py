@@ -1,12 +1,14 @@
 """Scene management system for handling multiple scenes and transitions."""
 from typing import Dict, List, Optional, Type, TypeVar
+
 from .scene import Scene
 
-T = TypeVar('T', bound=Scene)
+T = TypeVar("T", bound=Scene)
+
 
 class SceneManager:
     """Manages multiple scenes and handles transitions between them.
-    
+
     The SceneManager maintains a stack of scenes and ensures proper lifecycle
     management when switching between scenes.
     """
@@ -24,10 +26,10 @@ class SceneManager:
 
     def register_scene(self, scene: Scene) -> None:
         """Register a scene with the manager.
-        
+
         Args:
             scene: Scene to register
-            
+
         Raises:
             ValueError: If scene with same name already exists
         """
@@ -37,10 +39,10 @@ class SceneManager:
 
     def get_scene(self, name: str) -> Optional[Scene]:
         """Get a registered scene by name.
-        
+
         Args:
             name: Name of the scene
-            
+
         Returns:
             Scene if found, None otherwise
         """
@@ -48,9 +50,9 @@ class SceneManager:
 
     def push_scene(self, scene: Scene) -> None:
         """Push a new scene onto the stack.
-        
+
         The current scene (if any) will be paused.
-        
+
         Args:
             scene: Scene to push
         """
@@ -68,7 +70,7 @@ class SceneManager:
 
     def pop_scene(self) -> Optional[Scene]:
         """Pop the current scene from the stack.
-        
+
         Returns:
             The popped scene, or None if stack was empty
         """
@@ -87,7 +89,7 @@ class SceneManager:
 
     def switch_scene(self, scene: Scene) -> None:
         """Switch to a new scene, replacing the current one.
-        
+
         Args:
             scene: Scene to switch to
         """
@@ -100,7 +102,7 @@ class SceneManager:
 
     def update(self, dt: float) -> None:
         """Update the current scene.
-        
+
         Args:
             dt: Delta time in seconds
         """
@@ -111,4 +113,4 @@ class SceneManager:
         """Clear all scenes and reset the manager."""
         while self._scene_stack:
             self.pop_scene()
-        self._scenes.clear() 
+        self._scenes.clear()

@@ -1,8 +1,11 @@
 import sys
 from typing import List, Tuple
+
 import pygame
+
 from src.core import Window, WindowConfig
 from src.core.game_loop import GameLoop, GameLoopConfig
+
 
 class Game:
     def __init__(self) -> None:
@@ -12,14 +15,13 @@ class Game:
             width=640,
             height=480,
             scale=1,
-            vsync=True
+            vsync=True,
         )
         self.window = Window(window_config)
 
         # Initialize game loop
         loop_config = GameLoopConfig(
-            target_fps=60,
-            fixed_update_fps=50  # 50Hz for physics updates
+            target_fps=60, fixed_update_fps=50  # 50Hz for physics updates
         )
         self.game_loop = GameLoop(loop_config)
 
@@ -30,7 +32,7 @@ class Game:
 
         # Game state
         self.square_pos: List[float] = [320.0, 240.0]  # Center of screen
-        self.square_vel: List[float] = [200.0, 150.0]   # Pixels per second
+        self.square_vel: List[float] = [200.0, 150.0]  # Pixels per second
         self.square_size = 50
 
         # Colors
@@ -131,8 +133,8 @@ class Game:
                 int(self.square_pos[0]),
                 int(self.square_pos[1]),
                 self.square_size,
-                self.square_size
-            )
+                self.square_size,
+            ),
         )
 
         # Draw performance metrics
@@ -141,9 +143,11 @@ class Game:
         # Present the frame
         self.window.present()
 
+
 def main() -> None:
     game = Game()
     game.game_loop.run()
+
 
 if __name__ == "__main__":
     main()

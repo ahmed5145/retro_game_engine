@@ -1,26 +1,24 @@
 import sys
 from typing import List, Tuple
+
 import pygame
+
 from src.core import Window, WindowConfig
 from src.core.game_loop import GameLoop, GameLoopConfig
 from src.core.input import InputManager
+
 
 class Game:
     def __init__(self) -> None:
         # Initialize window
         window_config = WindowConfig(
-            title="Input System Example",
-            width=640,
-            height=480,
-            scale=1,
-            vsync=True
+            title="Input System Example", width=640, height=480, scale=1, vsync=True
         )
         self.window = Window(window_config)
 
         # Initialize game loop
         loop_config = GameLoopConfig(
-            target_fps=60,
-            fixed_update_fps=50  # 50Hz for physics updates
+            target_fps=60, fixed_update_fps=50  # 50Hz for physics updates
         )
         self.game_loop = GameLoop(loop_config)
 
@@ -100,7 +98,9 @@ class Game:
         self.player_vel[0] = move_dir * self.move_speed
 
         # Handle jumping
-        if self.on_ground and (self.input.is_pressed("JUMP") or self.input.is_buffered("JUMP")):
+        if self.on_ground and (
+            self.input.is_pressed("JUMP") or self.input.is_buffered("JUMP")
+        ):
             self.player_vel[1] = self.jump_force
             self.on_ground = False
 
@@ -163,7 +163,7 @@ class Game:
         pygame.draw.rect(
             self.window.surface,
             self.ground_color,
-            (0, self.window.height - 20, self.window.width, 20)
+            (0, self.window.height - 20, self.window.width, 20),
         )
 
         # Draw the player
@@ -174,8 +174,8 @@ class Game:
                 int(self.player_pos[0]),
                 int(self.player_pos[1]),
                 self.player_size,
-                self.player_size
-            )
+                self.player_size,
+            ),
         )
 
         # Draw input state
@@ -184,9 +184,11 @@ class Game:
         # Present the frame
         self.window.present()
 
+
 def main() -> None:
     game = Game()
     game.game_loop.run()
+
 
 if __name__ == "__main__":
     main()

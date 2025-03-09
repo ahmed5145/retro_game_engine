@@ -43,61 +43,69 @@ class AudioClip:
         """
         try:
             self._sound = pygame.mixer.Sound(self.path)
-            self._sound.set_volume(self.config.volume)
-        except (pygame.error, FileNotFoundError) as e:
-            self._sound = None
+        except pygame.error as e:
             raise RuntimeError(f"Failed to load audio file '{self.path}': {e}") from e
 
-    def play(self, channel: Optional[pygame.mixer.Channel] = None) -> Optional[pygame.mixer.Channel]:
+    def play(
+        self, channel: Optional[pygame.mixer.Channel] = None
+    ) -> Optional[pygame.mixer.Channel]:
         """Play the audio clip.
-        
+
         Args:
             channel: Optional channel to play on (default: None)
-            
+
         Returns:
             Channel the sound is playing on, or None if playback failed
+
+        Raises:
+            RuntimeError: If the clip hasn't been loaded
         """
         if not self._sound:
-            self.load()
-            if not self._sound:
-                return None
+            raise RuntimeError("Audio clip must be loaded before playing")
 
         try:
-            if channel:
-                self._channel = channel
-            else:
-                # Find an available channel
-                self._channel = pygame.mixer.find_channel()
-                if not self._channel:
-                    print(f"No available channels to play audio clip '{self.path}'")
-                    return None
+            # Store previous channel and find new one
+            prev_channel = self._channel
+            self._channel = channel or pygame.mixer.find_channel()
 
-            # Play the sound with proper looping
-            if self._channel:
-                self._channel.set_volume(self.config.volume)
-                self._channel.play(self._sound, loops=-1 if self.config.loop else 0)
-                return self._channel
+            # Handle channel allocation failure
+            if not self._channel:
+                print(f"No available channels to play audio clip '{self.path}'")
+                return None
+
+            # Configure and play the sound
+            self._channel.set_volume(self.config.volume)
+            self._channel.play(self._sound, loops=-1 if self.config.loop else 0)
+            if self.config.loop:
+                self._channel.set_endevent(-1)  # Disable end event for looping
+
+            # Stop previous channel if different
+            if prev_channel and prev_channel != self._channel:
+                prev_channel.stop()
+
+            return self._channel
 
         except pygame.error as e:
-            print(f"Error playing audio clip '{self.path}': {e}")
+            print(f"Failed to play audio clip '{self.path}': {e}")
             return None
-
-        return None
 
     def stop(self) -> None:
         """Stop playing the audio clip."""
-        if self._channel and self._channel.get_busy():
+        if self._channel:
             self._channel.stop()
-        self._channel = None
 
     def set_volume(self, volume: float) -> None:
-        """Set the volume level.
+        """Set the volume of the audio clip.
 
         Args:
             volume: Volume level between 0.0 and 1.0
+
+        Raises:
+            ValueError: If volume is not between 0.0 and 1.0
         """
-        # Clamp volume between 0 and 1
-        volume = max(0.0, min(1.0, volume))
+        if not 0.0 <= volume <= 1.0:
+            raise ValueError("Volume must be between 0.0 and 1.0")
+
         self.config.volume = volume
         if self._sound:
             self._sound.set_volume(volume)

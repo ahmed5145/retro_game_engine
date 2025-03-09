@@ -47,13 +47,13 @@ def setup_audio() -> Generator[None, None, None]:
         pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
     except pygame.error:
         # If default driver fails, try dummy driver for CI environment
-        os.environ['SDL_AUDIODRIVER'] = 'dummy'
+        os.environ["SDL_AUDIODRIVER"] = "dummy"
         try:
             pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
         except pygame.error:
             # If both fail, skip audio tests
             pytest.skip("No audio device available")
-    
+
     yield
     pygame.mixer.quit()
 
