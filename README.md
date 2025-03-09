@@ -69,6 +69,10 @@ if __name__ == "__main__":
 - [Installation Guide](docs/installation.md)
 - [Tutorials](docs/tutorials/README.md)
 - [API Reference](docs/api/README.md)
+  - [Game Loop](docs/api/game_loop.md) - Core game loop and timing system
+  - [Window](docs/api/window.md) - Window management and rendering
+  - [Sprite](docs/api/sprite.md) - Sprite and animation system
+  - [Input](docs/api/input.md) - Input handling system
 - [Examples](docs/examples/README.md)
 - [Best Practices](docs/guides/best-practices.md)
 - [Migration Guide](docs/guides/migration.md)

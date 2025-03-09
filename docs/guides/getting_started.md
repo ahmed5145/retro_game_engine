@@ -1,87 +1,86 @@
 # Getting Started with Retro Game Engine
 
-Welcome to Retro Game Engine! This guide will help you get up and running with your first game project.
-
-## Prerequisites
-
-Before you begin, ensure you have:
-
-- Python 3.8 or higher installed
-- Poetry (dependency management tool)
-- Basic understanding of Python programming
-- A text editor or IDE (we recommend VS Code)
+This guide will help you get started with creating your first game using the Retro Game Engine.
 
 ## Installation
 
-1. Install the Retro Game Engine using pip:
+1. First, make sure you have Python 3.9 or newer installed:
+```bash
+python --version
+```
+
+2. Install the engine using pip:
 ```bash
 pip install retro-game-engine
 ```
 
-2. Or install using Poetry:
+Or using Poetry:
 ```bash
 poetry add retro-game-engine
 ```
 
-## Your First Game
+## Creating Your First Game
 
-Let's create a simple game with a bouncing sprite!
+Here's a simple example that creates a window and displays a sprite:
 
-1. Create a new directory for your project:
-```bash
-mkdir my-first-game
-cd my-first-game
-```
-
-2. Create a new Python file `main.py`:
 ```python
-from retro_game_engine import GameLoop, Scene, Sprite
-from retro_game_engine.core.input import Input
-from retro_game_engine.core.physics import Physics
+from src.core import Window, WindowConfig
+from src.core.game_loop import GameLoop, GameLoopConfig
+from src.core.sprite import Sprite, SpriteSheet, SpriteConfig
 
-class MainScene(Scene):
+class MyGame:
     def __init__(self):
-        super().__init__()
-        # Create a bouncing sprite
-        self.sprite = Sprite("assets/ball.png")
-        self.sprite.config.x = 400
-        self.sprite.config.y = 300
-        self.velocity_y = 0
-        self.gravity = 0.5
+        # Create window
+        window_config = WindowConfig(
+            title="My First Game",
+            width=320,
+            height=240,
+            scale=2
+        )
+        self.window = Window(window_config)
 
-    def update(self, delta_time: float):
-        # Apply gravity
-        self.velocity_y += self.gravity
-        self.sprite.config.y += self.velocity_y
+        # Load sprite
+        self.sprite_sheet = SpriteSheet("player.png")
+        self.sprite = Sprite(
+            self.sprite_sheet,
+            SpriteConfig(x=160, y=120)
+        )
 
-        # Bounce when hitting bottom of screen
-        if self.sprite.config.y > 550:
-            self.sprite.config.y = 550
-            self.velocity_y = -15
+        # Create game loop
+        self.game_loop = GameLoop(
+            update_func=self.update,
+            render_func=self.render,
+            config=GameLoopConfig(fps=60)
+        )
 
-    def draw(self, surface):
-        self.sprite.draw(surface)
+    def update(self, dt: float) -> None:
+        # Update game state
+        pass
 
-def main():
-    game = GameLoop()
-    game.window_title = "My First Game"
-    game.window_width = 800
-    game.window_height = 600
-    game.current_scene = MainScene()
-    game.run()
+    def render(self) -> None:
+        # Clear screen
+        self.window.clear()
+
+        # Draw sprite
+        self.sprite.draw(self.window.surface)
+
+        # Update display
+        self.window.present()
+
+    def run(self) -> None:
+        self.game_loop.run()
 
 if __name__ == "__main__":
-    main()
+    game = MyGame()
+    game.run()
 ```
 
-3. Create an `assets` directory and add a ball image (you can use any small PNG file).
+## Next Steps
 
-4. Run your game:
-```bash
-python main.py
-```
-
-Congratulations! You've created your first game with Retro Game Engine!
+- Check out the [examples](../../examples/README.md) for more complex game implementations
+- Read the [API Reference](../api/index.md) for detailed documentation
+- Learn about the [Entity Component System](../guides/ecs.md)
+- See [Best Practices](../guides/best_practices.md) for tips and guidelines
 
 ## Core Concepts
 
@@ -123,16 +122,6 @@ The physics system includes:
 - Gravity simulation
 - Velocity and acceleration
 
-## Next Steps
-
-1. Explore the [examples](../examples) directory for more game ideas
-2. Read the [API documentation](../api) for detailed information
-3. Check out the [tutorials](../tutorials) for guided learning
-4. Join our community:
-   - GitHub Discussions
-   - Discord Server
-   - Stack Overflow tag: `retro-game-engine`
-
 ## Common Issues
 
 ### Game runs slowly
@@ -153,9 +142,9 @@ The physics system includes:
 ## Getting Help
 
 If you run into issues:
-1. Check the [documentation](https://retro-game-engine.readthedocs.io)
+1. Check the documentation
 2. Search existing GitHub issues
-3. Ask in our Discord community
-4. Open a new GitHub issue
+
+3. Open a new GitHub issue
 
 Happy game development! 🎮
