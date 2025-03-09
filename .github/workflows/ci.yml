@@ -24,7 +24,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-dev libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev libasound2-dev
+        sudo apt-get install -y python3-dev libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev
 
     - name: Install Poetry
       run: |
@@ -38,14 +38,11 @@ jobs:
       run: |
         poetry install
 
-    - name: Install dummy audio device
-      run: |
-        sudo modprobe snd-dummy
-
     - name: Run tests
       env:
         SDL_AUDIODRIVER: dummy
         SDL_VIDEODRIVER: dummy
+        PYGAME_HIDE_SUPPORT_PROMPT: 1
       run: |
         poetry run pytest
 
