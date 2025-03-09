@@ -51,10 +51,12 @@ jobs:
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
+      continue-on-error: true  # Don't fail the build if Codecov is down
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
-        fail_ci_if_error: true
+        fail_ci_if_error: false  # Don't fail on upload errors
+        verbose: true  # Enable verbose output for debugging
 
     - name: Type checking
       run: poetry run mypy src tests
