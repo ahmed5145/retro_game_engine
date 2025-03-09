@@ -48,32 +48,21 @@ class AudioClip:
             self._sound = None
             raise RuntimeError(f"Failed to load audio file '{self.path}': {e}") from e
 
-    def play(
-        self, channel: Optional[pygame.mixer.Channel] = None
-    ) -> Optional[pygame.mixer.Channel]:
+    def play(self, channel: Optional[pygame.mixer.Channel] = None) -> Optional[pygame.mixer.Channel]:
         """Play the audio clip.
-
+        
         Args:
-            channel: Optional channel to play on
-
+            channel: Optional channel to play on (default: None)
+            
         Returns:
             Channel the sound is playing on, or None if playback failed
-
-        Raises:
-            RuntimeError: If the clip hasn't been loaded
         """
         if not self._sound:
-            raise RuntimeError("Audio clip must be loaded before playing")
-
-        # Stop if already playing
-        prev_channel = None
-        if self._channel and self._channel.get_busy():
-            prev_channel = self._channel
-            prev_channel.stop()
-            self._channel = None
+            self.load()
+            if not self._sound:
+                return None
 
         try:
-            # Play on specified channel or any available channel
             if channel:
                 self._channel = channel
             else:
@@ -84,19 +73,16 @@ class AudioClip:
                     return None
 
             # Play the sound with proper looping
-            self._channel.play(self._sound, loops=-1 if self.config.loop else 0)
-            if self.config.loop:
-                self._channel.set_endevent(-1)  # Disable end event for looping
+            if self._channel:
+                self._channel.set_volume(self.config.volume)
+                self._channel.play(self._sound, loops=-1 if self.config.loop else 0)
+                return self._channel
 
-            # Verify previous channel was stopped
-            if prev_channel and prev_channel.get_busy():
-                prev_channel.stop()
-
-            return self._channel
         except pygame.error as e:
-            print(f"Failed to play audio clip '{self.path}': {e}")
-            self._channel = None
+            print(f"Error playing audio clip '{self.path}': {e}")
             return None
+
+        return None
 
     def stop(self) -> None:
         """Stop playing the audio clip."""

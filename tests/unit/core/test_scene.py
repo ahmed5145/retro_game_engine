@@ -21,19 +21,22 @@ def test_scene_lifecycle() -> None:
     assert scene.initialized
     
     # Test load
-    scene.load()
-    assert scene.active
-    assert not scene.paused
+    if scene.initialized:
+        scene.load()
+        assert scene.active
+        assert not scene.paused
     
-    # Test pause/resume
-    scene.pause()
-    assert scene.paused
-    scene.resume()
-    assert not scene.paused
+        # Test pause/resume
+        if scene.active:
+            scene.pause()
+            assert scene.paused
+            scene.resume()
+            assert not scene.paused
     
-    # Test unload
-    scene.unload()
-    assert not scene.active
+            # Test unload
+            if not scene.paused:
+                scene.unload()
+                assert not scene.active
 
 def test_scene_environment_variables() -> None:
     """Test scene environment variable management."""

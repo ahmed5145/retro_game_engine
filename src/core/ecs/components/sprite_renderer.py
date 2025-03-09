@@ -60,7 +60,7 @@ class SpriteRenderer(Component):
         self.config.y = world_pos.y
         self.config.scale_x = world_scale.x
         self.config.scale_y = world_scale.y
-        self.config.rotation = self._transform.get_world_rotation()
+        self.config.rotation = int(self._transform.get_world_rotation())
 
         # Draw the sprite
         self.sprite.draw(surface)
