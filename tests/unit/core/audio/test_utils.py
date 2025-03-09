@@ -42,8 +42,18 @@ def create_test_audio_file(
 @pytest.fixture(autouse=True)
 def setup_audio() -> Generator[None, None, None]:
     """Set up pygame mixer for tests."""
-    # Initialize mixer with test settings
-    pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+    try:
+        # Try to initialize with default driver
+        pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+    except pygame.error:
+        # If default driver fails, try dummy driver for CI environment
+        os.environ['SDL_AUDIODRIVER'] = 'dummy'
+        try:
+            pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+        except pygame.error:
+            # If both fail, skip audio tests
+            pytest.skip("No audio device available")
+    
     yield
     pygame.mixer.quit()
 
