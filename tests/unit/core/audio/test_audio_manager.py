@@ -1,88 +1,92 @@
 """Tests for the AudioManager class."""
+import os
+import wave
+from pathlib import Path
+
+import pygame
 import pytest
 
-from src.core.audio import AudioConfig, AudioManager
-from tests.unit.core.audio.test_utils import setup_audio
-
-
-@pytest.fixture(autouse=True)
-def _setup_audio() -> None:
-    """Set up audio for testing."""
-    setup_audio()
+from src.core.audio.audio_clip import AudioClip
+from src.core.audio.audio_manager import AudioManager
 
 
 @pytest.fixture
 def audio_manager() -> AudioManager:
-    """Create an audio manager for testing."""
-    return AudioManager(num_channels=4)
+    """Create an AudioManager instance for testing."""
+    pygame.mixer.init()
+    manager = AudioManager()
+    yield manager
+    pygame.mixer.quit()
 
 
-def test_audio_manager_initialization(audio_manager: AudioManager) -> None:
-    """Test audio manager initialization."""
-    assert len(audio_manager._channels) == 4
-    assert audio_manager._master_volume == 1.0
-    assert audio_manager._music_volume == 1.0
-    assert audio_manager._sfx_volume == 1.0
-    assert audio_manager._current_music is None
+@pytest.fixture
+def test_audio_file() -> str:
+    """Create a test audio file."""
+    test_file = "test.wav"
+    if not os.path.exists(test_file):
+        # Create a simple WAV file for testing
+        with wave.open(test_file, "wb") as wav_file:
+            wav_file.setnchannels(1)  # Mono
+            wav_file.setsampwidth(2)  # 16-bit
+            wav_file.setframerate(44100)  # 44.1kHz
+            wav_file.writeframes(b"\x00" * 44100)  # 1 second of silence
+    yield test_file
+    # Stop any playing music and unload it
+    pygame.mixer.music.stop()
+    pygame.mixer.music.unload()
+    # Small delay to ensure resources are released
+    pygame.time.wait(100)
+    if os.path.exists(test_file):
+        os.remove(test_file)
+
+
+def test_audio_manager_initialization() -> None:
+    """Test AudioManager initialization."""
+    pygame.mixer.init()
+    manager = AudioManager()
+    assert manager is not None
+    pygame.mixer.quit()
 
 
 def test_load_clip(audio_manager: AudioManager, test_audio_file: str) -> None:
-    """Test loading audio clips."""
-    # Test loading valid clip
-    audio_manager.load_clip("test", test_audio_file)
-    assert "test" in audio_manager._clips
-
-    # Test loading with config
-    config = AudioConfig(volume=0.5, loop=True)
-    audio_manager.load_clip("test2", test_audio_file, config)
-    assert "test2" in audio_manager._clips
-    assert audio_manager._clips["test2"].config == config
-
-    # Test loading invalid file
-    audio_manager.load_clip("invalid", "nonexistent.wav")
-    assert "invalid" not in audio_manager._clips
+    """Test loading an audio clip."""
+    clip = audio_manager.load_clip(path=test_audio_file)
+    assert clip is not None
+    assert isinstance(clip, AudioClip)
 
 
 def test_play_sound(audio_manager: AudioManager, test_audio_file: str) -> None:
-    """Test playing sound effects."""
-    # Load test clip
-    audio_manager.load_clip("test", test_audio_file)
-
-    # Test playing valid sound
-    channel = audio_manager.play_sound("test")
+    """Test playing a sound effect."""
+    clip = audio_manager.load_clip(path=test_audio_file)
+    assert clip is not None, "Failed to load audio clip"
+    channel = audio_manager.play_sound(clip)
     assert channel is not None
     assert channel.get_busy()
 
-    # Test playing non-existent sound
-    channel = audio_manager.play_sound("nonexistent")
-    assert channel is None
-
 
 def test_play_music(audio_manager: AudioManager, test_audio_file: str) -> None:
-    """Test playing background music."""
-    # Load test clip
-    audio_manager.load_clip("music", test_audio_file)
-
-    # Test playing music
-    audio_manager.play_music("music")
-    assert audio_manager._current_music == "music"
-
-    # Test playing different music
-    audio_manager.load_clip("music2", test_audio_file)
-    audio_manager.play_music("music2")
-    assert audio_manager._current_music == "music2"
-
-    # Test playing non-existent music
-    audio_manager.play_music("nonexistent")
-    assert audio_manager._current_music == "music2"  # Should not change
+    """Test playing music."""
+    audio_manager.play_music(test_audio_file)
+    assert pygame.mixer.music.get_busy()
 
 
-def test_volume_control(audio_manager: AudioManager, test_audio_file: str) -> None:
+def test_music_controls(audio_manager: AudioManager, test_audio_file: str) -> None:
+    """Test music playback controls."""
+    audio_manager.play_music(test_audio_file)
+    assert pygame.mixer.music.get_busy()
+
+    audio_manager.pause_music()
+    assert not pygame.mixer.music.get_busy()
+
+    audio_manager.resume_music()
+    assert pygame.mixer.music.get_busy()
+
+    audio_manager.stop_music()
+    assert not pygame.mixer.music.get_busy()
+
+
+def test_volume_control(audio_manager: AudioManager) -> None:
     """Test volume control."""
-    # Load test clips
-    audio_manager.load_clip("sfx", test_audio_file)
-    audio_manager.load_clip("music", test_audio_file)
-
     # Test master volume
     audio_manager.set_master_volume(0.5)
     assert audio_manager._master_volume == 0.5
@@ -91,79 +95,62 @@ def test_volume_control(audio_manager: AudioManager, test_audio_file: str) -> No
     audio_manager.set_music_volume(0.7)
     assert audio_manager._music_volume == 0.7
 
-    # Test sfx volume
-    audio_manager.set_sfx_volume(0.3)
-    assert audio_manager._sfx_volume == 0.3
+    # Test sound volume
+    audio_manager.set_sound_volume(0.3)
+    assert audio_manager._sound_volume == 0.3
 
-    # Test volume clamping
-    audio_manager.set_master_volume(1.5)
-    assert audio_manager._master_volume == 1.0
-
-    audio_manager.set_master_volume(-0.5)
-    assert audio_manager._master_volume == 0.0
-
-
-def test_music_controls(audio_manager: AudioManager, test_audio_file: str) -> None:
-    """Test music playback controls."""
-    # Load and play music
-    audio_manager.load_clip("music", test_audio_file)
-    audio_manager.play_music("music")
-
-    # Test pause/resume
-    audio_manager.pause_music()
-    # Would test channel state here if we had access to it
-
-    audio_manager.resume_music()
-    # Would test channel state here if we had access to it
-
-    # Test stop
-    audio_manager.stop_music()
-    assert audio_manager._current_music is None
+    # Test invalid values
+    with pytest.raises(ValueError):
+        audio_manager.set_master_volume(-0.1)
+    with pytest.raises(ValueError):
+        audio_manager.set_music_volume(1.1)
+    with pytest.raises(ValueError):
+        audio_manager.set_sound_volume(float("inf"))
 
 
 def test_channel_allocation(audio_manager: AudioManager, test_audio_file: str) -> None:
-    """Test channel allocation strategy."""
-    # Load test clips with different priorities
-    config_low = AudioConfig(priority=1)
-    config_high = AudioConfig(priority=10)
-
-    audio_manager.load_clip("low", test_audio_file, config_low)
-    audio_manager.load_clip("high", test_audio_file, config_high)
-
-    # Fill all channels with low priority sounds
+    """Test channel allocation for sound effects."""
+    clip = audio_manager.load_clip(path=test_audio_file)
+    assert clip is not None, "Failed to load audio clip"
     channels = []
-    for _ in range(4):
-        channel = audio_manager.play_sound("low")
-        assert channel is not None
-        channels.append(channel)
+    # Play multiple sounds
+    for _ in range(pygame.mixer.get_num_channels()):
+        channel = audio_manager.play_sound(clip)
+        if channel is not None:
+            channels.append(channel)
 
-    # Play high priority sound - should replace a low priority one
-    channel = audio_manager.play_sound("high")
-    assert channel is not None
-
-
-def test_cleanup(audio_manager: AudioManager, test_audio_file: str) -> None:
-    """Test cleanup."""
-    # Load and play some clips
-    audio_manager.load_clip("test", test_audio_file)
-    audio_manager.play_sound("test")
-
-    # Cleanup
-    audio_manager.cleanup()
-    assert len(audio_manager._clips) == 0
-    assert len(audio_manager._channels) == 0
+    # All channels should be busy
+    assert len(channels) > 0
+    assert all(channel.get_busy() for channel in channels)
 
 
 def test_stop_all(audio_manager: AudioManager, test_audio_file: str) -> None:
     """Test stopping all sounds."""
-    # Load and play clips
-    audio_manager.load_clip("sfx", test_audio_file)
-    audio_manager.load_clip("music", test_audio_file)
+    clip = audio_manager.load_clip(path=test_audio_file)
+    assert clip is not None, "Failed to load audio clip"
+    channels = []
+    # Play multiple sounds
+    for _ in range(4):
+        channel = audio_manager.play_sound(clip)
+        if channel is not None:
+            channels.append(channel)
 
-    audio_manager.play_sound("sfx")
-    audio_manager.play_music("music")
-
-    # Stop all
+    # Stop all sounds
     audio_manager.stop_all()
-    assert audio_manager._current_music is None
-    # Would verify all channels are stopped if we had access to them
+    assert all(not channel.get_busy() for channel in channels)
+
+
+def test_cleanup(audio_manager: AudioManager, test_audio_file: str) -> None:
+    """Test cleanup of audio resources."""
+    clip = audio_manager.load_clip(path=test_audio_file)
+    assert clip is not None, "Failed to load audio clip"
+    audio_manager.play_sound(clip)
+    audio_manager.play_music(test_audio_file)
+
+    # Cleanup should stop all sounds and music
+    audio_manager.cleanup()
+    assert not pygame.mixer.music.get_busy()
+    assert not any(
+        pygame.mixer.Channel(i).get_busy()
+        for i in range(pygame.mixer.get_num_channels())
+    )

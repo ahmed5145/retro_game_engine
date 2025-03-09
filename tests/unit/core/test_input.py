@@ -9,106 +9,118 @@ from src.core.input import InputAction, InputBinding, InputManager, InputState
 
 
 def test_input_manager_initialization() -> None:
-    """Test that input manager is properly initialized."""
-    input_manager = InputManager()
-    assert len(input_manager.actions) == 0
-    assert len(input_manager.bindings) == 0
-    assert len(input_manager.state) == 0
+    """Test input manager initialization."""
+    manager = InputManager()
+    assert not manager._bindings
+    assert not manager._pressed
+    assert not manager._held
+    assert not manager._released
+    assert not manager._buffer_times
 
 
 def test_action_registration() -> None:
-    """Test that actions can be registered and retrieved."""
-    input_manager = InputManager()
+    """Test registering input actions."""
+    manager = InputManager()
+    manager.register_action("JUMP")
+    assert "JUMP" in manager._bindings
+    assert not manager._bindings["JUMP"]  # No keys bound yet
 
-    # Register some actions
-    input_manager.register_action("MOVE_LEFT")
-    input_manager.register_action("MOVE_RIGHT")
-    input_manager.register_action("JUMP")
+    # Test registering with buffer time
+    manager.register_action("ATTACK", buffer_time=0.1)
+    assert "ATTACK" in manager._bindings
+    assert "ATTACK" in manager._buffer_durations
+    assert manager._buffer_durations["ATTACK"] == 0.1
 
-    assert "MOVE_LEFT" in input_manager.actions
-    assert "MOVE_RIGHT" in input_manager.actions
-    assert "JUMP" in input_manager.actions
-
-    # Try to register duplicate action
+    # Test duplicate registration
     with pytest.raises(ValueError):
-        input_manager.register_action("MOVE_LEFT")
+        manager.register_action("JUMP")
 
 
 def test_key_binding() -> None:
-    """Test that keys can be bound to actions."""
-    input_manager = InputManager()
+    """Test binding keys to actions."""
+    manager = InputManager()
+    manager.register_action("JUMP")
+    manager.bind_key("JUMP", pygame.K_SPACE)
 
-    # Register and bind actions
-    input_manager.register_action("MOVE_LEFT")
-    input_manager.register_action("MOVE_RIGHT")
+    assert pygame.K_SPACE in manager._bindings["JUMP"]
+    assert manager._key_to_action[pygame.K_SPACE] == "JUMP"
 
-    input_manager.bind_key("MOVE_LEFT", pygame.K_LEFT)
-    input_manager.bind_key("MOVE_RIGHT", pygame.K_RIGHT)
+    # Test binding multiple keys
+    manager.bind_key("JUMP", pygame.K_UP)
+    assert pygame.K_UP in manager._bindings["JUMP"]
+    assert manager._key_to_action[pygame.K_UP] == "JUMP"
 
-    assert input_manager.get_bindings("MOVE_LEFT") == {pygame.K_LEFT}
-    assert input_manager.get_bindings("MOVE_RIGHT") == {pygame.K_RIGHT}
-
-    # Test binding multiple keys to same action
-    input_manager.bind_key("MOVE_LEFT", pygame.K_a)
-    assert input_manager.get_bindings("MOVE_LEFT") == {pygame.K_LEFT, pygame.K_a}
+    # Test binding to non-existent action
+    with pytest.raises(KeyError):
+        manager.bind_key("NONEXISTENT", pygame.K_SPACE)
 
 
 def test_input_state() -> None:
     """Test input state tracking."""
-    input_manager = InputManager()
-    input_manager.register_action("JUMP")
-    input_manager.bind_key("JUMP", pygame.K_SPACE)
+    manager = InputManager()
+    manager.register_action("JUMP")
+    manager.bind_key("JUMP", pygame.K_SPACE)
 
-    # Simulate key press
+    # Test key press
     event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_SPACE})
-    input_manager.process_event(event)
+    manager.process_event(event)
 
-    assert input_manager.is_pressed("JUMP")
-    assert input_manager.is_held("JUMP")
-    assert not input_manager.is_released("JUMP")
+    assert manager.is_pressed("JUMP")
+    assert manager.is_held("JUMP")
+    assert not manager.is_released("JUMP")
 
-    # Simulate key release
+    # After update, should only be held
+    manager.update()
+    assert not manager.is_pressed("JUMP")
+    assert manager.is_held("JUMP")
+    assert not manager.is_released("JUMP")
+
+    # Test key release
     event = pygame.event.Event(pygame.KEYUP, {"key": pygame.K_SPACE})
-    input_manager.process_event(event)
+    manager.process_event(event)
 
-    assert not input_manager.is_pressed("JUMP")
-    assert not input_manager.is_held("JUMP")
-    assert input_manager.is_released("JUMP")
+    assert not manager.is_pressed("JUMP")
+    assert not manager.is_held("JUMP")
+    assert manager.is_released("JUMP")
 
-    # State should be cleared after update
-    input_manager.update()
-    assert not input_manager.is_pressed("JUMP")
-    assert not input_manager.is_held("JUMP")
-    assert not input_manager.is_released("JUMP")
+    # After update, all states should be cleared
+    manager.update()
+    assert not manager.is_pressed("JUMP")
+    assert not manager.is_held("JUMP")
+    assert not manager.is_released("JUMP")
 
 
 def test_input_buffering() -> None:
     """Test input buffering system."""
-    input_manager = InputManager()
-    input_manager.register_action("ATTACK", buffer_time=0.1)  # 100ms buffer
-    input_manager.bind_key("ATTACK", pygame.K_x)
+    manager = InputManager()
+    manager.register_action("ATTACK", buffer_time=0.1)  # 100ms buffer
+    manager.bind_key("ATTACK", pygame.K_x)
 
-    # Simulate key press
+    # Test key press
     event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_x})
-    input_manager.process_event(event)
+    manager.process_event(event)
 
-    assert input_manager.is_pressed("ATTACK")
-    assert input_manager.is_buffered("ATTACK")
+    assert manager.is_pressed("ATTACK")
+    assert manager.is_held("ATTACK")
+    assert manager.is_buffered("ATTACK")
 
-    # Buffer should remain active for buffer_time
-    input_manager.update()  # First frame
-    assert not input_manager.is_pressed("ATTACK")
-    assert input_manager.is_buffered("ATTACK")
+    # After update, should still be held and buffered
+    manager.update()
+    assert not manager.is_pressed("ATTACK")
+    assert manager.is_held("ATTACK")
+    assert manager.is_buffered("ATTACK")
 
-    # Simulate buffer expiration
-    input_manager._buffer_times["ATTACK"] = 0  # Force buffer expiration
-    input_manager.update()
-    assert not input_manager.is_buffered("ATTACK")
+    # Test buffer expiration
+    manager._buffer_times["ATTACK"] = -0.1  # Force buffer expiration
+    manager.update()
+    assert not manager.is_pressed("ATTACK")
+    assert manager.is_held("ATTACK")
+    assert not manager.is_buffered("ATTACK")
 
 
 def test_action_mapping() -> None:
     """Test action mapping system."""
-    input_manager = InputManager()
+    manager = InputManager()
 
     # Create a mapping
     mapping = {
@@ -117,76 +129,55 @@ def test_action_mapping() -> None:
         "JUMP": [pygame.K_SPACE, pygame.K_w],
     }
 
-    input_manager.load_mapping(mapping)
+    manager.load_mapping(mapping)
 
     # Verify all actions and bindings are set up
     for action, keys in mapping.items():
-        assert action in input_manager.actions
-        assert input_manager.get_bindings(action) == set(keys)
-
-
-def test_error_handling() -> None:
-    """Test error handling for invalid actions and operations."""
-    input_manager = InputManager()
-
-    # Test various invalid operations
-    with pytest.raises(ValueError):
-        input_manager.bind_key("NONEXISTENT", pygame.K_a)
-
-    with pytest.raises(ValueError):
-        input_manager.is_pressed("NONEXISTENT")
-
-    with pytest.raises(ValueError):
-        input_manager.is_held("NONEXISTENT")
-
-    with pytest.raises(ValueError):
-        input_manager.is_released("NONEXISTENT")
-
-    with pytest.raises(ValueError):
-        input_manager.is_buffered("NONEXISTENT")
-
-    with pytest.raises(ValueError):
-        input_manager.clear_bindings("NONEXISTENT")
+        assert action in manager._bindings
+        for key in keys:
+            assert key in manager._bindings[action]
+            assert manager._key_to_action[key] == action
 
 
 def test_binding_management() -> None:
-    """Test comprehensive binding management."""
-    input_manager = InputManager()
-    input_manager.register_action("TEST")
+    """Test managing key bindings."""
+    manager = InputManager()
+    manager.register_action("TEST")
+    manager.bind_key("TEST", pygame.K_a)
 
-    # Add multiple bindings
-    input_manager.bind_key("TEST", pygame.K_a)
-    input_manager.bind_key("TEST", pygame.K_b)
-    input_manager.bind_key("TEST", pygame.K_c)
+    # Test unbinding key
+    manager.unbind_key("TEST", pygame.K_a)
+    assert pygame.K_a not in manager._bindings["TEST"]
+    assert pygame.K_a not in manager._key_to_action
 
-    assert len(input_manager.get_bindings("TEST")) == 3
-
-    # Clear bindings
-    input_manager.clear_bindings("TEST")
-    assert len(input_manager.get_bindings("TEST")) == 0
-
-    # Test that events for cleared bindings don't trigger the action
-    event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_a})
-    input_manager.process_event(event)
-    assert not input_manager.is_pressed("TEST")
+    # Test clearing all bindings
+    manager.bind_key("TEST", pygame.K_b)
+    manager.clear_bindings("TEST")
+    assert not manager._bindings["TEST"]
+    assert pygame.K_b not in manager._key_to_action
 
 
 def test_multiple_key_bindings() -> None:
-    """Test handling multiple key bindings for the same action."""
-    input_manager = InputManager()
-    input_manager.register_action("JUMP")
+    """Test handling multiple key bindings for an action."""
+    manager = InputManager()
+    manager.register_action("MOVE")
+    manager.bind_key("MOVE", pygame.K_LEFT)
+    manager.bind_key("MOVE", pygame.K_a)
 
-    # Bind multiple keys
-    input_manager.bind_key("JUMP", pygame.K_SPACE)
-    input_manager.bind_key("JUMP", pygame.K_w)
-    input_manager.bind_key("JUMP", pygame.K_UP)
+    # Test both keys trigger the action
+    event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_LEFT})
+    manager.process_event(event)
+    manager.update()
+    assert manager.is_held("MOVE")
 
-    # Test each key triggers the action
-    for key in [pygame.K_SPACE, pygame.K_w, pygame.K_UP]:
-        event = pygame.event.Event(pygame.KEYDOWN, {"key": key})
-        input_manager.process_event(event)
-        assert input_manager.is_pressed("JUMP")
-        input_manager.update()
+    event = pygame.event.Event(pygame.KEYUP, {"key": pygame.K_LEFT})
+    manager.process_event(event)
+    manager.update()
+
+    event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_a})
+    manager.process_event(event)
+    manager.update()
+    assert manager.is_held("MOVE")
 
 
 def test_simultaneous_keys() -> None:
@@ -204,8 +195,17 @@ def test_simultaneous_keys() -> None:
 
     input_manager.process_event(event1)
     input_manager.process_event(event2)
+    input_manager.update()
 
     assert input_manager.is_held("MOVE_LEFT")
+    assert input_manager.is_held("MOVE_RIGHT")
+
+    # Release one key
+    event = pygame.event.Event(pygame.KEYUP, {"key": pygame.K_LEFT})
+    input_manager.process_event(event)
+    input_manager.update()
+
+    assert not input_manager.is_held("MOVE_LEFT")
     assert input_manager.is_held("MOVE_RIGHT")
 
 

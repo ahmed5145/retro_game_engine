@@ -16,20 +16,9 @@ class Game:
         )
         self.window = Window(window_config)
 
-        # Initialize game loop
-        loop_config = GameLoopConfig(
-            target_fps=60, fixed_update_fps=50  # 50Hz for physics updates
-        )
-        self.game_loop = GameLoop(loop_config)
-
         # Initialize input manager
         self.input = InputManager()
         self._setup_input()
-
-        # Set up game loop callbacks
-        self.game_loop.update = self.update
-        self.game_loop.fixed_update = self.fixed_update
-        self.game_loop.render = self.render
 
         # Game state
         self.player_pos: List[float] = [320.0, 240.0]  # Center of screen
@@ -49,6 +38,12 @@ class Game:
         # Initialize font
         pygame.font.init()
         self.font = pygame.font.Font(None, 24)  # Default font, size 24
+
+        # Initialize game loop with callbacks
+        loop_config = GameLoopConfig(fps=60)
+        self.game_loop = GameLoop(
+            update_func=self.update, render_func=self.render, config=loop_config
+        )
 
     def _setup_input(self) -> None:
         """Set up input actions and bindings."""
@@ -76,18 +71,19 @@ class Game:
             # Pass events to input manager
             self.input.process_event(event)
 
-    def update(self) -> None:
-        """Variable timestep update - handle input."""
+    def update(self, dt: float) -> None:
+        """Update game state.
+
+        Args:
+            dt: Time delta in seconds
+        """
         self.handle_events()
 
         # Check for quit
         if self.input.is_pressed("QUIT"):
             self.game_loop.stop()
 
-    def fixed_update(self) -> None:
-        """Fixed timestep update - update physics."""
-        dt = self.game_loop.fixed_delta_time
-
+        # Apply physics
         # Handle horizontal movement
         move_dir = 0.0
         if self.input.is_held("MOVE_LEFT"):
@@ -127,62 +123,36 @@ class Game:
             self.player_pos[0] = self.window.width - self.player_size
             self.player_vel[0] = 0
 
-    def render_input_state(self) -> None:
-        """Render current input state."""
-        y = 10
-        line_height = 20
-
-        def render_line(text: str, y: int) -> None:
-            surface = self.font.render(text, True, self.text_color)
-            self.window.surface.blit(surface, (10, y))
-
-        # Show state of each action
-        actions = ["MOVE_LEFT", "MOVE_RIGHT", "JUMP"]
-        for action in actions:
-            state = []
-            if self.input.is_pressed(action):
-                state.append("PRESSED")
-            if self.input.is_held(action):
-                state.append("HELD")
-            if self.input.is_released(action):
-                state.append("RELEASED")
-            if self.input.is_buffered(action):
-                state.append("BUFFERED")
-            if not state:
-                state.append("NONE")
-
-            render_line(f"{action}: {', '.join(state)}", y)
-            y += line_height
-
     def render(self) -> None:
-        """Render the current game state."""
-        # Clear the screen
-        self.window.clear(self.background_color)
+        """Render the current frame."""
+        # Clear screen
+        self.window.surface.fill(self.background_color)
 
-        # Draw the ground
-        pygame.draw.rect(
-            self.window.surface,
-            self.ground_color,
-            (0, self.window.height - 20, self.window.width, 20),
-        )
+        # Draw ground
+        ground_rect = pygame.Rect(0, self.window.height - 10, self.window.width, 10)
+        pygame.draw.rect(self.window.surface, self.ground_color, ground_rect)
 
-        # Draw the player
-        pygame.draw.rect(
-            self.window.surface,
-            self.player_color,
-            (
-                int(self.player_pos[0]),
-                int(self.player_pos[1]),
-                self.player_size,
-                self.player_size,
-            ),
+        # Draw player
+        player_rect = pygame.Rect(
+            int(self.player_pos[0]),
+            int(self.player_pos[1]),
+            self.player_size,
+            self.player_size,
         )
+        pygame.draw.rect(self.window.surface, self.player_color, player_rect)
 
         # Draw input state
-        self.render_input_state()
+        y = 10
+        for action in ["MOVE_LEFT", "MOVE_RIGHT", "JUMP"]:
+            text = f"{action}: Pressed={self.input.is_pressed(action)}, Held={self.input.is_held(action)}"
+            if action == "JUMP":
+                text += f", Buffered={self.input.is_buffered(action)}"
+            surface = self.font.render(text, True, self.text_color)
+            self.window.surface.blit(surface, (10, y))
+            y += 30
 
-        # Present the frame
-        self.window.present()
+        # Update display
+        pygame.display.flip()
 
 
 def main() -> None:

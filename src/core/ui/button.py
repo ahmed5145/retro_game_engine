@@ -4,7 +4,7 @@ from typing import Callable, Optional, Tuple, cast
 
 import pygame
 
-from src.core.ui.text import Text
+from src.core.ui.text import Text, TextConfig
 from src.core.ui.ui_element import UIElement, UIRect
 
 
@@ -20,15 +20,17 @@ class ButtonStyle:
         border_width: Width of button border in pixels
         corner_radius: Radius for rounded corners (0 for square)
         padding: Padding around text (left, top, right, bottom)
+        text_config: Text configuration
     """
 
     background_color: Tuple[int, int, int] = (100, 100, 100)
     hover_color: Tuple[int, int, int] = (120, 120, 120)
     pressed_color: Tuple[int, int, int] = (80, 80, 80)
-    border_color: Tuple[int, int, int] = (50, 50, 50)
-    border_width: int = 2
-    corner_radius: int = 5
-    padding: Tuple[int, int, int, int] = (10, 5, 10, 5)
+    border_color: Optional[Tuple[int, int, int]] = None
+    border_width: int = 0
+    corner_radius: int = 0
+    padding: Tuple[int, int, int, int] = (0, 0, 0, 0)
+    text_config: Optional[TextConfig] = None
 
 
 class Button(UIElement):
@@ -43,72 +45,89 @@ class Button(UIElement):
             style: Visual style configuration
         """
         super().__init__(rect)
+
+        self.style = style
+        self._hovered = False
+        self._pressed = False
+        self._on_click: Optional[Callable[[], None]] = None
+        self._last_mouse_pos = (0, 0)
+
+        # Create text element
         text_rect = UIRect(
             x=style.padding[0],
             y=style.padding[1],
             width=rect.width - style.padding[0] - style.padding[2],
             height=rect.height - style.padding[1] - style.padding[3],
+            anchor_x=0.5,
+            anchor_y=0.5,
         )
-        self.text_element = Text(text, text_rect)
-        self.text_element.parent = self
-        self.style = style
-        self._hovered = False
-        self._pressed = False
-        self._on_click: Optional[Callable[[], None]] = None
-        self._surface: Optional[pygame.Surface] = None
-        self._needs_update = True
+        self.text_element = Text(text, text_rect, style.text_config)
+        self.add_child(self.text_element)
 
     @property
-    def on_click(self) -> Optional[Callable[[], None]]:
-        """Get the click callback."""
-        return self._on_click
+    def text(self) -> str:
+        """Get the button's text.
 
-    @on_click.setter
-    def on_click(self, callback: Optional[Callable[[], None]]) -> None:
-        """Set the click callback."""
-        self._on_click = callback
+        Returns:
+            Current button text
+        """
+        return self.text_element.text
 
-    def set_text(self, text: str) -> None:
+    @text.setter
+    def text(self, value: str) -> None:
         """Set the button's text.
 
         Args:
-            text: New text to display
+            value: New text to display
         """
-        self.text_element.set_text(text)
-        self._needs_update = True
+        self.text_element.text = value
+
+    def set_text(self, text: str) -> None:
+        """Set the button's text (legacy method)."""
+        self.text = text
+
+    @property
+    def on_click(self) -> Optional[Callable[[], None]]:
+        """Get the click handler."""
+        return self._on_click
+
+    @on_click.setter
+    def on_click(self, value: Optional[Callable[[], None]]) -> None:
+        """Set the click handler."""
+        self._on_click = value
 
     def handle_event(self, event: pygame.event.Event) -> bool:
-        """Handle input events.
+        """Handle pygame events.
 
         Args:
-            event: Pygame event to handle
+            event: The pygame event to handle
 
         Returns:
-            True if event was handled
+            True if the event was handled, False otherwise
         """
-        if not self._enabled:
+        if not self.enabled or not self.visible:
             return False
+
+        if hasattr(event, "pos"):
+            self._last_mouse_pos = event.pos
+
+        bounds = self.get_bounds()
+        mouse_over = bounds.collidepoint(self._last_mouse_pos)
 
         if event.type == pygame.MOUSEMOTION:
             was_hovered = self._hovered
-            self._hovered = self.contains_point(event.pos)
-            if was_hovered != self._hovered:
-                self._needs_update = True
-            return self._hovered
-
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.contains_point(event.pos):
+            self._hovered = mouse_over
+            return was_hovered != self._hovered
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if mouse_over:
+                self._hovered = True
                 self._pressed = True
-                self._needs_update = True
                 return True
-
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             was_pressed = self._pressed
             self._pressed = False
-            if was_pressed and self.contains_point(event.pos):
-                if self._on_click is not None:
-                    self._on_click()
-            self._needs_update = True
+            if was_pressed and mouse_over and self._on_click is not None:
+                self._on_click()
             return was_pressed
 
         return False
@@ -122,59 +141,42 @@ class Button(UIElement):
         if not self.visible:
             return
 
-        bounds = self.get_bounds()
-
-        # Determine current color based on state
-        if not self.enabled:
-            color = self.style.background_color
-        elif self._pressed:
+        # Get current color based on state
+        color = self.style.background_color
+        if self._pressed:
             color = self.style.pressed_color
         elif self._hovered:
             color = self.style.hover_color
-        else:
-            color = self.style.background_color
 
-        # Create button surface if needed
-        if self._needs_update or self._surface is None:
-            self._surface = pygame.Surface(
-                (bounds.width, bounds.height), pygame.SRCALPHA
+        # Draw background
+        rect = pygame.Rect(
+            self.screen_rect.x,
+            self.screen_rect.y,
+            self.screen_rect.width,
+            self.screen_rect.height,
+        )
+        if self.style.corner_radius > 0:
+            pygame.draw.rect(
+                surface,
+                color,
+                rect,
+                border_radius=self.style.corner_radius,
+            )
+        else:
+            pygame.draw.rect(surface, color, rect)
+
+        # Draw border
+        if self.style.border_color and self.style.border_width > 0:
+            pygame.draw.rect(
+                surface,
+                self.style.border_color,
+                rect,
+                self.style.border_width,
+                border_radius=self.style.corner_radius,
             )
 
-            # Draw background
-            if self.style.corner_radius > 0:
-                pygame.draw.rect(
-                    self._surface,
-                    color,
-                    (0, 0, bounds.width, bounds.height),
-                    border_radius=self.style.corner_radius,
-                )
-                if self.style.border_width > 0:
-                    pygame.draw.rect(
-                        self._surface,
-                        self.style.border_color,
-                        (0, 0, bounds.width, bounds.height),
-                        width=self.style.border_width,
-                        border_radius=self.style.corner_radius,
-                    )
-            else:
-                pygame.draw.rect(
-                    self._surface, color, (0, 0, bounds.width, bounds.height)
-                )
-                if self.style.border_width > 0:
-                    pygame.draw.rect(
-                        self._surface,
-                        self.style.border_color,
-                        (0, 0, bounds.width, bounds.height),
-                        width=self.style.border_width,
-                    )
-
-            self._needs_update = False
-
-        # Draw button background
-        surface.blit(self._surface, (bounds.x, bounds.y))
-
-        # Draw text
-        self.text_element.render(surface)
+        # Render text
+        super().render(surface)
 
     def update(self, dt: float) -> None:
         """Update button state.
@@ -183,32 +185,39 @@ class Button(UIElement):
             dt: Time delta in seconds
         """
         super().update(dt)
+
+        # Update text element state
+        self.text_element.enabled = self.enabled
+        self.text_element.visible = self.visible
         self.text_element.update(dt)
 
-        # Update hover state
-        mouse_pos = pygame.mouse.get_pos()
+        # Reset hover state if button is disabled or invisible
+        if not self.enabled or not self.visible:
+            self._hovered = False
+            self._pressed = False
+            return
+
+        # Update hover state based on last known mouse position
         bounds = self.get_bounds()
+        self._hovered = bounds.collidepoint(self._last_mouse_pos)
 
-        # Get the window offset
-        window = pygame.display.get_surface()
-        if window:
-            window_pos = window.get_offset()
-            mouse_x = mouse_pos[0] - window_pos[0]
-            mouse_y = mouse_pos[1] - window_pos[1]
-
-            self._hovered = (
-                bounds.x <= mouse_x <= bounds.x + bounds.width
-                and bounds.y <= mouse_y <= bounds.y + bounds.height
-            )
-
-        # Handle click
-        if self._hovered and self._pressed and not pygame.mouse.get_pressed()[0]:
-            self._pressed = False
-            if self._on_click is not None:
-                self._on_click()
-        elif self._hovered and pygame.mouse.get_pressed()[0]:
-            self._pressed = True
-        elif not pygame.mouse.get_pressed()[0]:
+        # If mouse is not hovering, button can't be pressed
+        if not self._hovered:
             self._pressed = False
 
-        self._needs_update = False
+    def get_bounds(self, parent_bounds: Optional[pygame.Rect] = None) -> pygame.Rect:
+        """Calculate the button's screen-space bounds.
+
+        Args:
+            parent_bounds: Parent element's bounds (for percentage calculations)
+
+        Returns:
+            Button's bounds in screen coordinates
+        """
+        bounds = super().get_bounds(parent_bounds)
+        return pygame.Rect(
+            bounds.x,
+            bounds.y,
+            bounds.width,
+            bounds.height,
+        )

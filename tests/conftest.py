@@ -9,6 +9,6 @@ import pytest
 def pygame_init() -> Generator[None, None, None]:
     """Initialize pygame before each test."""
     pygame.init()
-    pygame.display.set_mode((100, 100))  # Create a small display surface
+    pygame.display.set_mode((800, 600))  # Create a window large enough for UI tests
     yield
     pygame.quit()

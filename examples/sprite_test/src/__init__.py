@@ -1,6 +1,7 @@
 """Example demonstrating the sprite system features."""
 import math
 import os
+from typing import List
 
 import pygame
 
@@ -26,38 +27,25 @@ class Game:
         )
         self.window = Window(window_config)
 
-        # Initialize game loop
-        loop_config = GameLoopConfig(target_fps=60, fixed_update_fps=50)
-        self.game_loop = GameLoop(loop_config)
-
         # Initialize input
         self.input = InputManager()
         self._setup_input()
 
-        # Set up game loop callbacks
-        self.game_loop.update = self.update
-        self.game_loop.fixed_update = self.fixed_update
-        self.game_loop.render = self.render
-
         # Load sprite sheet
         assets_dir = os.path.join(os.path.dirname(__file__), "assets")
         sprite_sheet = SpriteSheet(os.path.join(assets_dir, "character.png"))
-        sprite_sheet.add_frames_grid(32, 32)  # 32x32 character frames
 
         # Create sprite renderer
         self.sprite_renderer = SpriteRenderer()
+        self.sprites: List[Sprite] = []
 
-        # Create test sprites
-        self.sprites = []
-
-        # Background sprite (z-index 0)
-        bg_config = SpriteConfig(
-            x=0, y=0, scale_x=20, scale_y=15, z_index=0  # Scale to fill screen
-        )
-        bg_sprite = Sprite(sprite_sheet, bg_config)
-        bg_sprite.set_frame(0)  # Use first frame as background
-        self.sprite_renderer.add_sprite(bg_sprite)
-        self.sprites.append(bg_sprite)
+        # Background sprites (z-index 0)
+        for i in range(3):
+            config = SpriteConfig(x=80 + i * 100, y=120, z_index=0)
+            sprite = Sprite(sprite_sheet, config)
+            sprite.set_frame(i)  # Use different frames
+            self.sprite_renderer.add_sprite(sprite)
+            self.sprites.append(sprite)
 
         # Character sprites (z-index 1)
         for i in range(4):
@@ -74,6 +62,12 @@ class Game:
         # Animation state
         self.time = 0.0
 
+        # Initialize game loop with callbacks
+        loop_config = GameLoopConfig(fps=60)
+        self.game_loop = GameLoop(
+            update_func=self.update, render_func=self.render, config=loop_config
+        )
+
     def _setup_input(self) -> None:
         """Set up input actions and bindings."""
         self.input.register_action("QUIT")
@@ -86,49 +80,54 @@ class Game:
                 self.game_loop.stop()
             self.input.process_event(event)
 
-    def update(self) -> None:
-        """Variable timestep update."""
+    def update(self, dt: float) -> None:
+        """Update game state.
+
+        Args:
+            dt: Time delta in seconds
+        """
         self.handle_events()
 
-        if self.input.is_pressed("QUIT"):
-            self.game_loop.stop()
-
-    def fixed_update(self) -> None:
-        """Fixed timestep update."""
-        dt = self.game_loop.fixed_delta_time
+        # Update animation time
         self.time += dt
 
         # Animate sprites
-        for i, sprite in enumerate(self.sprites[1:], 1):  # Skip background
-            # Different effects for each sprite
-            if i == 1:  # First sprite: rotate
-                sprite.config.rotation = int(self.time * 90) % 360
-            elif i == 2:  # Second sprite: scale
-                scale = 1 + 0.5 * abs(math.sin(self.time * 2))
-                sprite.config.scale_x = scale
-                sprite.config.scale_y = scale
-            elif i == 3:  # Third sprite: fade
-                alpha = int(127 + 127 * math.sin(self.time * 2))
-                sprite.config.alpha = alpha
-            elif i == 4:  # Fourth sprite: flip
-                sprite.config.flip_x = int(self.time) % 2 == 0
+        for i, sprite in enumerate(self.sprites):
+            # Make sprites bob up and down
+            amplitude = 10.0  # pixels
+            frequency = 2.0  # Hz
+            phase = i * 0.5  # offset each sprite
+            y_offset = amplitude * math.sin(
+                2.0 * math.pi * frequency * self.time + phase
+            )
+            sprite.config.y = 120 if i < 3 else 240  # Base Y position
+            sprite.config.y += y_offset
+
+            # Rotate sprites
+            sprite.config.rotation = int(math.sin(self.time + i) * 30.0)  # ±30 degrees
+
+            # Scale sprites
+            base_scale = 1.0
+            scale_amount = 0.2
+            scale = base_scale + math.sin(self.time * 2.0 + i) * scale_amount
+            sprite.config.scale_x = scale
+            sprite.config.scale_y = scale
 
     def render(self) -> None:
         """Render the current frame."""
-        # Clear the screen
-        self.window.clear((0, 0, 0))
+        # Clear screen
+        self.window.surface.fill((100, 100, 100))  # Gray background
 
         # Render all sprites
         self.sprite_renderer.render(self.window.surface)
 
-        # Draw FPS
-        fps_text = self.font.render(
-            f"FPS: {self.game_loop.metrics.fps:.1f}", True, (255, 255, 255)
-        )
+        # Draw FPS counter
+        fps = int(self.game_loop.average_fps)
+        fps_text = self.font.render(f"FPS: {fps}", True, (255, 255, 255))
         self.window.surface.blit(fps_text, (10, 10))
 
-        # Present the frame
-        self.window.present()
+        # Update display
+        pygame.display.flip()
 
 
 def main() -> None:

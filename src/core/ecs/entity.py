@@ -25,14 +25,14 @@ class Entity:
         self._components: Dict[Type[Component], Component] = {}
         self._children: Dict[str, "Entity"] = {}
         self._parent: Optional["Entity"] = None
-        self._enabled: bool = True
+        self._enabled = True
 
     @property
     def enabled(self) -> bool:
         """Get whether the entity is enabled.
 
         Returns:
-            True if the entity is enabled, False otherwise
+            True if the entity is enabled
         """
         return self._enabled
 
@@ -41,9 +41,83 @@ class Entity:
         """Set whether the entity is enabled.
 
         Args:
-            value: True to enable the entity, False to disable it
+            value: True to enable, False to disable
         """
         self._enabled = value
+
+    @property
+    def components(self) -> Dict[Type[Component], Component]:
+        """Get the components dictionary.
+
+        Returns:
+            Dictionary mapping component types to component instances
+        """
+        return self._components
+
+    @property
+    def children(self) -> Dict[str, "Entity"]:
+        """Get the children dictionary.
+
+        Returns:
+            Dictionary mapping child IDs to child entities
+        """
+        return self._children
+
+    @property
+    def parent(self) -> Optional["Entity"]:
+        """Get the parent entity.
+
+        Returns:
+            Parent entity or None if this is a root entity
+        """
+        return self._parent
+
+    def _set_parent(self, parent: Optional["Entity"]) -> None:
+        """Internal method to set the parent entity.
+
+        Args:
+            parent: Entity to set as parent, or None to remove parent
+        """
+        self._parent = parent
+
+    def set_parent(self, parent: Optional["Entity"]) -> None:
+        """Set the parent of this entity.
+
+        Args:
+            parent: Entity to set as parent, or None to remove parent
+        """
+        if self._parent == parent:
+            return
+
+        # Remove from old parent
+        if self._parent:
+            self._parent.remove_child(self)
+
+        # Set new parent
+        self._parent = parent
+        if parent:
+            parent.add_child(self)
+
+    def add_child(self, child: "Entity") -> None:
+        """Add a child entity.
+
+        Args:
+            child: Entity to add as a child
+        """
+        if child.parent:
+            child.parent.remove_child(child)
+        child._set_parent(self)
+        self._children[child.id] = child
+
+    def remove_child(self, child: "Entity") -> None:
+        """Remove a child entity.
+
+        Args:
+            child: Entity to remove
+        """
+        if child.id in self._children:
+            child._set_parent(None)
+            del self._children[child.id]
 
     def add_component(self, component: Component) -> None:
         """Add a component to the entity.
@@ -97,61 +171,6 @@ class Entity:
             True if the entity has the component, False otherwise
         """
         return component_type in self._components
-
-    def set_parent(self, parent: Optional["Entity"]) -> None:
-        """Set the parent of this entity.
-
-        Args:
-            parent: Entity to set as parent, or None to remove parent
-        """
-        if self._parent == parent:
-            return
-
-        # Remove from old parent
-        if self._parent:
-            self._parent.remove_child(self)
-
-        # Set new parent
-        self._parent = parent
-        if parent:
-            parent.add_child(self)
-
-    def add_child(self, child: "Entity") -> None:
-        """Add a child entity.
-
-        Args:
-            child: Entity to add as a child
-        """
-        self._children[child.id] = child
-        child._parent = self
-
-    def remove_child(self, child: "Entity") -> None:
-        """Remove a child entity.
-
-        Args:
-            child: Entity to remove
-        """
-        if child.id in self._children:
-            del self._children[child.id]
-            child._parent = None
-
-    @property
-    def parent(self) -> Optional["Entity"]:
-        """Get the parent entity.
-
-        Returns:
-            The parent entity, or None if no parent
-        """
-        return self._parent
-
-    @property
-    def children(self) -> Dict[str, "Entity"]:
-        """Get the dictionary of child entities.
-
-        Returns:
-            Dictionary of child entities, keyed by their IDs
-        """
-        return self._children
 
     def __repr__(self) -> str:
         """Get string representation of the entity.

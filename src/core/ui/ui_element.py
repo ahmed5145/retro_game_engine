@@ -47,6 +47,7 @@ class UIElement:
         self._enabled = True
         self._z_index = 0
         self._cached_bounds: Optional[pygame.Rect] = None
+        self._screen_rect: Optional[pygame.Rect] = None
 
     @property
     def parent(self) -> Optional["UIElement"]:
@@ -66,6 +67,7 @@ class UIElement:
         if value:
             value._children.append(self)
         self._cached_bounds = None
+        self._screen_rect = None
 
     @property
     def visible(self) -> bool:
@@ -109,6 +111,46 @@ class UIElement:
         """
         self._z_index = value
 
+    @property
+    def screen_rect(self) -> pygame.Rect:
+        """Get the screen-space rectangle.
+
+        Returns:
+            Rectangle in screen coordinates
+        """
+        if self._screen_rect is None:
+            # Calculate screen position
+            x = self.rect.x
+            y = self.rect.y
+            width = self.rect.width
+            height = self.rect.height
+
+            # Convert percentages to pixels
+            if self.parent:
+                parent_rect = self.parent.screen_rect
+                if isinstance(x, float) and 0.0 <= x <= 1.0:
+                    x = parent_rect.width * x
+                if isinstance(y, float) and 0.0 <= y <= 1.0:
+                    y = parent_rect.height * y
+                if isinstance(width, float) and 0.0 <= width <= 1.0:
+                    width = parent_rect.width * width
+                if isinstance(height, float) and 0.0 <= height <= 1.0:
+                    height = parent_rect.height * height
+
+            # Apply anchor
+            x -= width * self.rect.anchor_x
+            y -= height * self.rect.anchor_y
+
+            # Add parent offset
+            if self.parent:
+                parent_rect = self.parent.screen_rect
+                x += parent_rect.x
+                y += parent_rect.y
+
+            self._screen_rect = pygame.Rect(int(x), int(y), int(width), int(height))
+
+        return self._screen_rect
+
     def add_child(self, child: "UIElement") -> None:
         """Add a child element.
 
@@ -137,7 +179,12 @@ class UIElement:
         """
         if not parent_bounds:
             # Use screen bounds if no parent
-            parent_bounds = pygame.display.get_surface().get_rect()
+            display = pygame.display.get_surface()
+            if display:
+                parent_bounds = display.get_rect()
+            else:
+                # Fallback to default size if no display
+                parent_bounds = pygame.Rect(0, 0, 800, 600)
 
         # Return cached bounds if parent hasn't changed
         if self._cached_bounds and parent_bounds == getattr(
@@ -145,27 +192,27 @@ class UIElement:
         ):
             return self._cached_bounds
 
-        # Calculate position
-        x = self.rect.x * parent_bounds.width if self.rect.x <= 1 else self.rect.x
-        y = self.rect.y * parent_bounds.height if self.rect.y <= 1 else self.rect.y
+        # Calculate position based on parent bounds
+        x = self.rect.x
+        y = self.rect.y
+        width = self.rect.width
+        height = self.rect.height
 
-        # Calculate size
-        width = (
-            self.rect.width * parent_bounds.width
-            if self.rect.width <= 1
-            else self.rect.width
-        )
-        height = (
-            self.rect.height * parent_bounds.height
-            if self.rect.height <= 1
-            else self.rect.height
-        )
+        # Convert percentages to pixels
+        if 0 <= x <= 1:
+            x = parent_bounds.width * x
+        if 0 <= y <= 1:
+            y = parent_bounds.height * y
+        if 0 <= width <= 1:
+            width = parent_bounds.width * width
+        if 0 <= height <= 1:
+            height = parent_bounds.height * height
 
         # Apply anchoring
         x -= width * self.rect.anchor_x
         y -= height * self.rect.anchor_y
 
-        # Offset by parent position
+        # Add parent offset
         x += parent_bounds.x
         y += parent_bounds.y
 
@@ -188,8 +235,8 @@ class UIElement:
             return False
 
         x, y = point
-        rect = self.get_bounds()
-        return bool(rect.collidepoint(x, y))
+        bounds = self.get_bounds()
+        return bool(bounds.collidepoint(int(x), int(y)))
 
     def update(self, dt: float) -> None:
         """Update the element.

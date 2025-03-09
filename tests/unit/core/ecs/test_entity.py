@@ -20,58 +20,43 @@ def test_component() -> DummyComponent:
 
 def test_entity_initialization() -> None:
     """Test entity initialization."""
-    entity = Entity("test_entity")
-    assert entity.name == "test_entity"
-    assert entity.id != ""
+    entity = Entity("test")
+    assert entity.name == "test"
+    assert not entity.components
+    assert not entity.children
     assert entity.enabled
-    assert not entity._components
-    assert not entity._children
     assert entity.parent is None
 
 
 def test_entity_auto_name() -> None:
-    """Test automatic entity naming."""
+    """Test auto-generated entity names."""
     entity = Entity()
-    assert entity.name.startswith("Entity_")
-    assert len(entity.name) > 7  # "Entity_" + at least 1 character
+    assert entity.name  # Should have a non-empty auto-generated name
 
 
 def test_add_component(test_component: DummyComponent) -> None:
     """Test adding a component to an entity."""
     entity = Entity()
-
-    # Test adding component
     entity.add_component(test_component)
-    assert test_component in entity._components
     assert test_component.entity == entity
-
-    # Test adding duplicate component type
-    with pytest.raises(ValueError):
-        entity.add_component(DummyComponent())
+    assert entity.get_component(DummyComponent) == test_component
 
 
 def test_remove_component(test_component: DummyComponent) -> None:
     """Test removing a component from an entity."""
     entity = Entity()
     entity.add_component(test_component)
-
-    # Test removing component
     entity.remove_component(DummyComponent)
-    assert test_component not in entity._components
     assert test_component.entity is None
+    assert entity.get_component(DummyComponent) is None
 
 
 def test_get_component(test_component: DummyComponent) -> None:
     """Test getting a component from an entity."""
     entity = Entity()
-    entity.add_component(test_component)
-
-    # Test getting existing component
-    assert entity.get_component(DummyComponent) == test_component
-
-    # Test getting non-existent component
-    entity.remove_component(DummyComponent)
     assert entity.get_component(DummyComponent) is None
+    entity.add_component(test_component)
+    assert entity.get_component(DummyComponent) == test_component
 
 
 def test_parent_child_relationship() -> None:

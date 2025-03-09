@@ -24,18 +24,9 @@ class Game:
         )
         self.window = Window(window_config)
 
-        # Initialize game loop
-        loop_config = GameLoopConfig(target_fps=60, fixed_update_fps=50)
-        self.game_loop = GameLoop(loop_config)
-
         # Initialize input
         self.input = InputManager()
         self._setup_input()
-
-        # Set up game loop callbacks
-        self.game_loop.update = self.update
-        self.game_loop.fixed_update = self.fixed_update
-        self.game_loop.render = self.render
 
         # Initialize font
         pygame.font.init()
@@ -52,6 +43,12 @@ class Game:
         self.tilemap = Tilemap(32, 32, self.tileset)
         self._setup_tileset()
         self._setup_tilemap()
+
+        # Initialize game loop with callbacks
+        loop_config = GameLoopConfig(fps=60)
+        self.game_loop = GameLoop(
+            update_func=self.update, render_func=self.render, config=loop_config
+        )
 
     def _setup_input(self) -> None:
         """Set up input actions and bindings."""
@@ -135,22 +132,15 @@ class Game:
                 self.game_loop.stop()
             self.input.process_event(event)
 
-    def update(self) -> None:
-        """Variable timestep update."""
+    def update(self, dt: float) -> None:
+        """Update game state.
+
+        Args:
+            dt: Time delta in seconds
+        """
         self.handle_events()
-        self.input.update()
 
-        if self.input.is_pressed("QUIT"):
-            self.game_loop.stop()
-
-    def fixed_update(self) -> None:
-        """Fixed timestep update."""
-        dt = self.game_loop.fixed_delta_time
-
-        # Update tilemap animations
-        self.tilemap.update(dt)
-
-        # Move camera
+        # Update camera position based on input
         if self.input.is_held("MOVE_LEFT"):
             self.camera_x -= self.camera_speed * dt
         if self.input.is_held("MOVE_RIGHT"):
@@ -160,28 +150,27 @@ class Game:
         if self.input.is_held("MOVE_DOWN"):
             self.camera_y += self.camera_speed * dt
 
-        # Clamp camera to map bounds
-        max_x = self.tilemap.width * self.tilemap.tile_width - self.window.width
-        max_y = self.tilemap.height * self.tilemap.tile_height - self.window.height
-        self.camera_x = max(0.0, min(self.camera_x, float(max_x)))
-        self.camera_y = max(0.0, min(self.camera_y, float(max_y)))
+        # Keep camera within map bounds
+        map_width = self.tilemap.width * self.tilemap.tile_width
+        map_height = self.tilemap.height * self.tilemap.tile_height
+        self.camera_x = max(0, min(self.camera_x, map_width - self.window.width))
+        self.camera_y = max(0, min(self.camera_y, map_height - self.window.height))
 
     def render(self) -> None:
         """Render the current frame."""
         # Clear the screen
-        self.window.clear((100, 150, 255))  # Sky blue
+        self.window.surface.fill((100, 150, 255))  # Sky blue
 
         # Render tilemap
         self.tilemap.render(self.window.surface, int(self.camera_x), int(self.camera_y))
 
         # Draw FPS
-        fps_text = self.font.render(
-            f"FPS: {self.game_loop.metrics.fps:.1f}", True, (255, 255, 255)
-        )
+        fps = int(self.game_loop.average_fps)
+        fps_text = self.font.render(f"FPS: {fps}", True, (255, 255, 255))
         self.window.surface.blit(fps_text, (10, 10))
 
-        # Present the frame
-        self.window.present()
+        # Update display
+        pygame.display.flip()
 
 
 def main() -> None:
