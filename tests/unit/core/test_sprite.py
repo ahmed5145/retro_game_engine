@@ -1,5 +1,6 @@
 """Tests for the sprite system."""
 import os
+from typing import Tuple
 
 import pygame
 import pytest
@@ -8,7 +9,7 @@ from src.core.sprite import Sprite, SpriteConfig, SpriteFrame, SpriteSheet
 
 
 def create_test_image(
-    width: int, height: int, color: tuple[int, int, int], path: str
+    width: int, height: int, color: Tuple[int, int, int], path: str
 ) -> None:
     """Create a test image file."""
     surface = pygame.Surface((width, height))

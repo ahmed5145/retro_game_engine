@@ -2,6 +2,7 @@
 import os
 import wave
 from pathlib import Path
+from typing import Generator
 
 import pygame
 import pytest
@@ -10,8 +11,17 @@ from src.core.audio.audio_clip import AudioClip
 from src.core.audio.audio_manager import AudioManager
 
 
+@pytest.fixture(autouse=True)
+def setup_audio() -> Generator[None, None, None]:
+    """Set up audio for testing."""
+    os.environ["SDL_AUDIODRIVER"] = "dummy"
+    pygame.mixer.init()
+    yield None
+    pygame.mixer.quit()
+
+
 @pytest.fixture
-def audio_manager() -> AudioManager:
+def audio_manager() -> Generator[AudioManager, None, None]:
     """Create an AudioManager instance for testing."""
     # Set dummy audio driver before any pygame initialization
     os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -31,7 +41,7 @@ def audio_manager() -> AudioManager:
 
 
 @pytest.fixture
-def test_audio_file() -> str:
+def test_audio_file() -> Generator[str, None, None]:
     """Create a test audio file."""
     test_file = "test.wav"
     if not os.path.exists(test_file):

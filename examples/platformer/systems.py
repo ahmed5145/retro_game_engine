@@ -1,10 +1,12 @@
 """Systems for the platformer example."""
-from typing import List, Optional, Tuple, TypeGuard, cast
+from typing import List, Optional, Tuple
 
 import pygame
+from typing_extensions import TypeGuard
 
 from examples.platformer.components import BoxCollider, Physics, PlayerController
 from src.core.ecs.components import Transform
+from src.core.ecs.components.transform import Transform
 from src.core.ecs.world import Entity, World
 from src.core.vector2d import Vector2D
 
@@ -56,15 +58,8 @@ def is_static_box_collider(collider: Optional[BoxCollider]) -> TypeGuard[BoxColl
 
 
 def is_box_collider(collider: Optional[BoxCollider]) -> TypeGuard[BoxCollider]:
-    """Check if a value is a BoxCollider.
-
-    Args:
-        collider: The value to check.
-
-    Returns:
-        bool: True if the value is a BoxCollider, False otherwise.
-    """
-    return isinstance(collider, BoxCollider)
+    """Type guard for BoxCollider."""
+    return collider is not None
 
 
 class PhysicsSystem:
@@ -135,17 +130,36 @@ class PhysicsSystem:
                     self._resolve_collision(entity, other, collision)
 
     def _check_collision(self, entity: Entity, other: Entity) -> Tuple[bool, Vector2D]:
-        """Check for collision between two entities.
+        """Check collision between two entities."""
+        collider_a = entity.get_component(BoxCollider)
+        collider_b = other.get_component(BoxCollider)
+        transform_a = entity.get_component(Transform)
+        transform_b = other.get_component(Transform)
 
-        Args:
-            entity: The first entity.
-            other: The second entity.
+        if (
+            not is_box_collider(collider_a)
+            or not is_box_collider(collider_b)
+            or transform_a is None
+            or transform_b is None
+        ):
+            return False, Vector2D()
 
-        Returns:
-            Tuple[bool, Vector2D]: A tuple containing whether a collision occurred and the collision normal.
-        """
-        # Implement collision detection logic here
-        return False, Vector2D(0, 0)
+        # Now we have all required components
+        rect_a = pygame.Rect(
+            transform_a.position.x,
+            transform_a.position.y,
+            collider_a.width,
+            collider_a.height,
+        )
+
+        rect_b = pygame.Rect(
+            transform_b.position.x,
+            transform_b.position.y,
+            collider_b.width,
+            collider_b.height,
+        )
+
+        return rect_a.colliderect(rect_b), Vector2D()
 
     def _resolve_collision(
         self, entity: Entity, other: Entity, collision: Tuple[bool, Vector2D]

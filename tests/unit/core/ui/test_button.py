@@ -1,4 +1,6 @@
 """Tests for the Button UI element."""
+from typing import Generator
+
 import pygame
 import pytest
 
@@ -7,13 +9,13 @@ from src.core.ui.ui_element import UIRect
 
 
 @pytest.fixture(autouse=True)
-def setup_pygame() -> None:
-    """Initialize pygame for testing."""
+def setup_pygame() -> Generator[None, None, None]:
+    """Set up pygame for testing."""
     pygame.init()
     pygame.display.set_mode((800, 600))
     pygame.event.get()  # Clear event queue
     pygame.mouse.set_pos((0, 0))  # Reset mouse position
-    yield
+    yield None
     pygame.quit()
 
 

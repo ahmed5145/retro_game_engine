@@ -6,7 +6,7 @@ input buffering, and state tracking for both keyboard and mouse input.
 import time
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Set
 
 import pygame
 
@@ -111,7 +111,7 @@ class InputManager:
         for key in list(self._bindings[action]):
             self.unbind_key(action, key)
 
-    def load_mapping(self, mapping: Dict[str, list[int]]) -> None:
+    def load_mapping(self, mapping: Dict[str, List[int]]) -> None:
         """Load a key mapping configuration.
 
         Args:

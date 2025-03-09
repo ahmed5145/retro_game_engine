@@ -1,5 +1,6 @@
 """Tests for the sprite renderer system."""
 import os
+from typing import Tuple
 
 import pygame
 import pytest
@@ -9,7 +10,7 @@ from src.core.sprite_renderer import SpriteRenderer
 
 
 def create_test_image(
-    width: int, height: int, color: tuple[int, int, int], path: str
+    width: int, height: int, color: Tuple[int, int, int], path: str
 ) -> None:
     """Create a test image file."""
     surface = pygame.Surface((width, height))
@@ -18,8 +19,8 @@ def create_test_image(
 
 
 def create_test_sprite(
-    z_index: int = 0, color: tuple[int, int, int] = (255, 0, 0)
-) -> tuple[Sprite, str]:
+    z_index: int = 0, color: Tuple[int, int, int] = (255, 0, 0)
+) -> Tuple[Sprite, str]:
     """Create a test sprite with the given z-index and color."""
     # Create test image
     path = f"test_sprite_{z_index}_{color[0]}_{color[1]}_{color[2]}.png"

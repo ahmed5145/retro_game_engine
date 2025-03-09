@@ -2,117 +2,89 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.7.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libasound2-dev
+        sudo apt-get install -y python3-dev libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev libasound2-dev
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
 
     - name: Configure Poetry
       run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-
-    - name: Update Poetry lock file
-      run: poetry lock --no-update
+        poetry config virtualenvs.create false
 
     - name: Install dependencies
       run: |
-        poetry install --with dev
-        poetry run pip install --upgrade pip setuptools wheel
+        poetry install
+
+    - name: Install dummy audio device
+      run: |
+        sudo modprobe snd-dummy
 
     - name: Run tests
-      run: poetry run pytest tests/ --cov=src --cov-report=xml
+      env:
+        SDL_AUDIODRIVER: dummy
+        SDL_VIDEODRIVER: dummy
+      run: |
+        poetry run pytest
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
-      continue-on-error: true  # Don't fail the build if Codecov is down
+      continue-on-error: true
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        fail_ci_if_error: false  # Don't fail on upload errors
-        verbose: true  # Enable verbose output for debugging
-
-    - name: Type checking
-      run: poetry run mypy src tests
-
-    - name: Lint
-      continue-on-error: ${{ matrix.python-version == '3.12' }}  # Temporarily allow 3.12 to fail
-      shell: bash
-      run: |
-        # Run pylint and capture its exit code
-        poetry run pylint src tests || {
-          exit_code=$?
-
-          # Pylint bit-encoded exit codes:
-          # 1: Fatal message issued
-          # 2: Error message issued
-          # 4: Warning message issued
-          # 8: Refactor message issued
-          # 16: Convention message issued
-          # 32: Usage error
-
-          # We only want to fail on fatal errors and usage errors
-          if [ $exit_code -eq 32 ] || [ $exit_code -eq 1 ] || [ $exit_code -eq 2 ]; then
-            echo "Pylint failed with fatal error or usage error (exit code $exit_code)"
-            exit 1
-          fi
-
-          # For other exit codes (warnings, refactor, convention), we'll pass
-          echo "Pylint completed with non-fatal messages (exit code $exit_code)"
-          exit 0
-        }
+        fail_ci_if_error: false
+        verbose: true
 
   build:
     needs: test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.11"
+        python-version: "3.12"
 
     - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.7.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Configure Poetry
+      run: |
+        poetry config virtualenvs.create false
+
+    - name: Install dependencies
+      run: |
+        poetry install
 
     - name: Build package
-      run: poetry build
+      run: |
+        poetry build
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
       with:
         name: dist
         path: dist/

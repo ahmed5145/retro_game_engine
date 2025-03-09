@@ -1,227 +1,124 @@
-# Retro Game Engine
+# Retro Game Engine 🎮
 
-A lightweight, feature-rich game development framework designed for creating authentic 8-bit and 16-bit style games. Built with Python and Pygame, this engine provides a robust set of tools while maintaining the aesthetic and technical constraints that defined the retro gaming era.
+[![CI](https://github.com/ahmed5145/retro_game_engine/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmed5145/retro_game_engine/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/retro-game-engine.svg)](https://badge.fury.io/py/retro-game-engine)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## Features
+A modern Python game development framework for creating authentic 8-bit and 16-bit style games. Built with performance and developer experience in mind, it provides a robust set of tools while maintaining the aesthetic and technical constraints that defined the retro gaming era.
 
-### Core Engine Components
+<p align="center">
+  <img src="docs/assets/logo.png" alt="Retro Game Engine Logo" width="200"/>
+</p>
 
-- **Rendering System**
-  - Pixel-perfect 2D rendering
-  - Multiple resolution modes
-  - Layer support with configurable depth
-  - Parallax scrolling effects
-  - Screen-space effects (screen shake, flash, fade)
+## ✨ Features
 
-- **Sprite System**
-  - Sprite sheet support with variable-sized frames
-  - Sprite flipping and rotation
-  - Z-ordering and transparency
-  - Batched sprite rendering for performance
-  - Animation support
+### 🎨 Core Engine
+- **High-Performance Rendering**: Pixel-perfect 2D graphics with hardware acceleration
+- **Flexible Sprite System**: Animation, batching, and effects
+- **Tile-Based Maps**: Scrolling, auto-tiling, and efficient culling
+- **Robust Physics**: Collision detection and resolution
+- **Audio Management**: Sound effects and music with priority system
+- **Input Handling**: Keyboard, mouse, and gamepad support
 
-- **Tile System**
-  - Multiple background layers with scrolling
-  - Tile-based collision maps
-  - Auto-tiling support
-  - Animated tiles
-  - Efficient culling of off-screen tiles
+### 🏗️ Architecture
+- **Entity Component System**: Modular and efficient game object management
+- **Scene Management**: Easy state transitions and persistence
+- **Event System**: Flexible communication between components
+- **UI Framework**: Text, menus, and HUD elements
 
-- **Physics & Collision**
-  - Rectangle and circle collision detection
-  - Spatial partitioning for performance
-  - Raycast collision detection
-  - Platform physics (gravity, jumping, etc.)
-  - Collision groups and masks
+[View all features →](docs/features.md)
 
-- **Audio System**
-  - Sound effect and music support
-  - Multiple audio channels
-  - Volume control per channel
-  - Sound priority system
+## 🚀 Quick Start
 
-- **Input System**
-  - Keyboard and mouse support
-  - Gamepad integration
-  - Input buffering
-  - Configurable key bindings
+### Installation
 
-### Entity Component System (ECS)
+```bash
+pip install retro-game-engine
+```
 
-- Component-based architecture
-- Predefined components (Transform, Sprite, etc.)
-- Entity templates/prefabs
-- Event system for entity communication
-- Efficient entity queries and updates
+### Create Your First Game
 
-### Scene Management
-
-- Multiple scene support
-- Scene transitions
-- Scene persistence
-- Environment variables per scene
-- Camera system with various behaviors
-
-### User Interface
-
-- Text rendering with bitmap fonts
-- Menu system
-- HUD elements
-- Dialog boxes with text animation
-- Screen-space UI anchoring
-
-## Installation
-
-1. Ensure you have Python 3.8+ installed
-2. Install Poetry (dependency management):
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
-3. Clone the repository:
-   ```bash
-   git clone https://github.com/ahmed5145/retro-game-engine.git
-   cd retro-game-engine
-   ```
-4. Install dependencies:
-   ```bash
-   poetry install
-   ```
-
-## Quick Start
-
-1. Create a new game project:
 ```python
-from src.core import Game, Scene, Entity
-from src.core.ecs.components import SpriteRenderer, Transform
+from retro_game_engine import Game, Scene, Entity
+from retro_game_engine.components import Transform, SpriteRenderer
 
 class MyGame(Game):
     def __init__(self):
         super().__init__(width=320, height=240, title="My Retro Game")
 
-        # Create a scene
+        # Create and setup your game scene
         scene = Scene("main")
-
-        # Create an entity
         player = Entity("player")
         player.add_component(Transform(x=160, y=120))
         player.add_component(SpriteRenderer("player.png"))
-
-        # Add entity to scene
         scene.add_entity(player)
 
-        # Set as active scene
+        # Start the game
         self.scene_manager.push_scene(scene)
 
 if __name__ == "__main__":
-    game = MyGame()
-    game.run()
+    MyGame().run()
 ```
 
-## Documentation
+[Get Started Guide →](docs/getting-started.md)
 
-### Core Concepts
+## 📚 Documentation
 
-#### Entity Component System
+- [Installation Guide](docs/installation.md)
+- [Tutorials](docs/tutorials/README.md)
+- [API Reference](docs/api/README.md)
+- [Examples](docs/examples/README.md)
+- [Best Practices](docs/guides/best-practices.md)
+- [Migration Guide](docs/guides/migration.md)
 
-The engine uses an ECS architecture where:
-- **Entities** are containers for components
-- **Components** hold data and behavior
-- **Systems** process entities with specific components
+## 🎮 Examples
 
-Example:
-```python
-# Create an entity
-player = Entity("player")
+- [Platformer Game](examples/platformer/README.md)
+- [Top-down RPG](examples/rpg/README.md)
+- [Shoot 'em up](examples/shmup/README.md)
+- [Puzzle Game](examples/puzzle/README.md)
 
-# Add components
-transform = Transform(x=100, y=100)
-sprite = SpriteRenderer("player.png")
-player.add_component(transform)
-player.add_component(sprite)
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/ahmed5145/retro_game_engine.git
+cd retro_game_engine
 ```
 
-#### Scene Management
-
-Scenes represent different game states or levels:
-```python
-class GameScene(Scene):
-    def on_enter(self):
-        # Setup when scene becomes active
-        self.create_player()
-        self.load_level()
-
-    def on_exit(self):
-        # Cleanup when scene is removed
-        self.clear()
-
-    def update(self, dt):
-        # Update logic
-        self.process_input()
-        self.update_entities(dt)
+2. Install Poetry (dependency management):
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-#### Collision Detection
-
-The engine provides various collision detection methods:
-```python
-# Rectangle collision
-if physics.check_collision(rect1, rect2):
-    handle_collision()
-
-# Tilemap collision
-collision = tilemap.check_collision(player_rect)
-if collision:
-    normal, penetration = collision
-    resolve_collision(normal, penetration)
+3. Install dependencies:
+```bash
+poetry install
 ```
 
-### Best Practices
-
-1. **Scene Organization**
-   - Keep scenes focused on a single responsibility
-   - Use scene transitions for loading/unloading
-   - Implement proper cleanup in `on_exit`
-
-2. **Component Design**
-   - Keep components small and focused
-   - Use composition over inheritance
-   - Cache component references when needed
-
-3. **Performance**
-   - Use spatial partitioning for large worlds
-   - Implement object pooling for frequent creation/destruction
-   - Batch similar operations (rendering, physics)
-
-4. **Memory Management**
-   - Clear resources when scenes exit
-   - Unload unused assets
-   - Use weak references for event listeners
-
-## Testing
-
-Run the test suite:
+4. Run tests:
 ```bash
 poetry run pytest
 ```
 
-Run with coverage:
-```bash
-poetry run pytest --cov=src
-```
+## 📝 License
 
-## Contributing
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and ensure they pass
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - Built with [Pygame](https://www.pygame.org/)
 - Inspired by classic game engines and retro gaming systems
+- Thanks to all [contributors](https://github.com/ahmed5145/retro_game_engine/graphs/contributors)
+
+## 📫 Contact & Support
+
+- [GitHub Issues](https://github.com/ahmed5145/retro_game_engine/issues) for bug reports and feature requests
+- [GitHub Discussions](https://github.com/ahmed5145/retro_game_engine/discussions) for questions and community discussions
+- [Documentation](https://retro-game-engine.readthedocs.io/) for comprehensive guides and API reference

@@ -1,99 +1,113 @@
 # Contributing to Retro Game Engine
 
-Thank you for your interest in contributing to Retro Game Engine! This document provides guidelines and instructions for contributing.
+First off, thank you for considering contributing to Retro Game Engine! It's people like you that make it such a great tool.
 
-## Development Setup
+## Code of Conduct
 
-1. Fork and clone the repository:
+This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+
+## How Can I Contribute?
+
+### Reporting Bugs
+
+Before creating bug reports, please check [this list](https://github.com/ahmed5145/retro_game_engine/issues) as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible:
+
+* Use a clear and descriptive title
+* Describe the exact steps which reproduce the problem
+* Provide specific examples to demonstrate the steps
+* Describe the behavior you observed after following the steps
+* Explain which behavior you expected to see instead and why
+* Include screenshots and animated GIFs if possible
+
+### Suggesting Enhancements
+
+Enhancement suggestions are tracked as [GitHub issues](https://github.com/ahmed5145/retro_game_engine/issues). When creating an enhancement suggestion, please provide:
+
+* A clear and descriptive title
+* A detailed description of the proposed feature
+* Examples of how the feature would be used
+* Explanation of why this enhancement would be useful
+
+### Pull Requests
+
+1. Fork the repo and create your branch from `main`
+2. If you've added code that should be tested, add tests
+3. If you've changed APIs, update the documentation
+4. Ensure the test suite passes
+5. Make sure your code lints
+
+## Development Process
+
+1. Clone the repository
 ```bash
 git clone https://github.com/ahmed5145/retro_game_engine.git
 cd retro_game_engine
 ```
 
-2. Install Poetry (dependency management):
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-3. Install dependencies:
+2. Install development dependencies
 ```bash
 poetry install
 ```
 
-4. Install pre-commit hooks:
+3. Create a branch
 ```bash
-poetry run pre-commit install
+git checkout -b feature/my-feature
+# or
+git checkout -b fix/my-fix
 ```
 
-## Development Workflow
-
-1. Create a new branch for your feature:
+4. Make your changes and commit
 ```bash
-git checkout -b feature/your-feature-name
+git add .
+git commit -m "Description of changes"
 ```
 
-2. Make your changes and ensure all tests pass:
+5. Run tests
 ```bash
 poetry run pytest
 ```
 
-3. Run type checking and linting:
+6. Push and create a Pull Request
 ```bash
-poetry run mypy src tests
-poetry run pylint src tests
+git push origin feature/my-feature
 ```
 
-4. Commit your changes using conventional commits:
-```bash
-git commit -m "feat: add new feature"
-```
+## Style Guide
 
-5. Push to your fork and create a pull request
+We use several tools to maintain code quality:
 
-## Code Style
+* **Black** for code formatting
+* **isort** for import sorting
+* **mypy** for type checking
+* **pylint** for code analysis
+* **flake8** for style guide enforcement
 
-- Follow PEP 8 guidelines
-- Use type hints for all function arguments and return values
-- Write docstrings for all public functions, classes, and modules
-- Keep functions focused and small
-- Write unit tests for new functionality
-
-## Running Tests
-
-```bash
-# Run all tests
-poetry run pytest
-
-# Run with coverage
-poetry run pytest --cov=src
-
-# Run specific test file
-poetry run pytest tests/path/to/test_file.py
-```
-
-## Pre-commit Hooks
-
-We use pre-commit hooks to ensure code quality. They run automatically on commit, but you can also run them manually:
-
+Run all checks with:
 ```bash
 poetry run pre-commit run --all-files
 ```
 
-## Release Process
+## Documentation
 
-1. Update version in pyproject.toml
-2. Create and push a new tag:
-```bash
-git tag -a v0.1.0 -m "Release v0.1.0"
-git push origin v0.1.0
-```
+* Use docstrings for all public modules, functions, classes, and methods
+* Follow Google style for docstrings
+* Keep documentation up to date with code changes
+* Add examples for complex functionality
 
-## Getting Help
+## Testing
 
-- Open an issue for bugs or feature requests
-- Join our Discord server for discussions
-- Check the documentation for detailed information
+* Write unit tests for new features
+* Maintain or improve test coverage
+* Test edge cases and error conditions
+* Use pytest fixtures and parametrize when appropriate
 
-## Code of Conduct
+## Commit Messages
 
-Please note that this project is released with a Contributor Code of Conduct. By participating in this project you agree to abide by its terms.
+* Use the present tense ("Add feature" not "Added feature")
+* Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+* Limit the first line to 72 characters or less
+* Reference issues and pull requests liberally after the first line
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the MIT License.

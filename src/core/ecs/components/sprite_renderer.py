@@ -1,5 +1,6 @@
 """SpriteRenderer component for rendering sprites on entities."""
 from dataclasses import dataclass, field
+from typing import Optional
 
 import pygame
 
@@ -20,7 +21,7 @@ class SpriteRenderer(Component):
 
     sprite: Sprite
     config: SpriteConfig = field(default_factory=SpriteConfig)
-    _transform: Transform | None = None
+    _transform: Optional[Transform] = None
 
     def __post_init__(self) -> None:
         """Initialize the component after dataclass initialization."""

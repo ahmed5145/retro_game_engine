@@ -10,22 +10,13 @@ from src.core.audio import AudioClip, AudioClipConfig
 
 
 @pytest.fixture(autouse=True)
-def setup_audio() -> None:
+def setup_audio() -> Generator[None, None, None]:
     """Set up pygame mixer for testing."""
-    # Set dummy audio driver before any pygame initialization
     os.environ["SDL_AUDIODRIVER"] = "dummy"
     os.environ["SDL_VIDEODRIVER"] = "dummy"
-
-    try:
-        pygame.mixer.init()
-        yield
-    except pygame.error as e:
-        pytest.skip(f"Could not initialize audio: {e}")
-    finally:
-        try:
-            pygame.mixer.quit()
-        except pygame.error:
-            pass
+    pygame.mixer.init()
+    yield None
+    pygame.mixer.quit()
 
 
 @pytest.fixture
