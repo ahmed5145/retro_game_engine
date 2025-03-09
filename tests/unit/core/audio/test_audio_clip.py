@@ -9,6 +9,25 @@ import pytest
 from src.core.audio import AudioClip, AudioClipConfig
 
 
+@pytest.fixture(autouse=True)
+def setup_audio() -> None:
+    """Set up pygame mixer for testing."""
+    # Set dummy audio driver before any pygame initialization
+    os.environ["SDL_AUDIODRIVER"] = "dummy"
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+    try:
+        pygame.mixer.init()
+        yield
+    except pygame.error as e:
+        pytest.skip(f"Could not initialize audio: {e}")
+    finally:
+        try:
+            pygame.mixer.quit()
+        except pygame.error:
+            pass
+
+
 @pytest.fixture
 def test_audio_file(tmp_path: str) -> Generator[str, None, None]:
     """Create a test WAV file."""

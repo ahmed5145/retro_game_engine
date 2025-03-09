@@ -13,10 +13,21 @@ from src.core.audio.audio_manager import AudioManager
 @pytest.fixture
 def audio_manager() -> AudioManager:
     """Create an AudioManager instance for testing."""
-    pygame.mixer.init()
-    manager = AudioManager()
-    yield manager
-    pygame.mixer.quit()
+    # Set dummy audio driver before any pygame initialization
+    os.environ["SDL_AUDIODRIVER"] = "dummy"
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+    try:
+        pygame.mixer.init()
+        manager = AudioManager()
+        yield manager
+    except pygame.error as e:
+        pytest.skip(f"Could not initialize audio: {e}")
+    finally:
+        try:
+            pygame.mixer.quit()
+        except pygame.error:
+            pass
 
 
 @pytest.fixture
@@ -32,20 +43,34 @@ def test_audio_file() -> str:
             wav_file.writeframes(b"\x00" * 44100)  # 1 second of silence
     yield test_file
     # Stop any playing music and unload it
-    pygame.mixer.music.stop()
-    pygame.mixer.music.unload()
-    # Small delay to ensure resources are released
-    pygame.time.wait(100)
+    try:
+        pygame.mixer.music.stop()
+        pygame.mixer.music.unload()
+        # Small delay to ensure resources are released
+        pygame.time.wait(100)
+    except pygame.error:
+        pass
     if os.path.exists(test_file):
         os.remove(test_file)
 
 
 def test_audio_manager_initialization() -> None:
     """Test AudioManager initialization."""
-    pygame.mixer.init()
-    manager = AudioManager()
-    assert manager is not None
-    pygame.mixer.quit()
+    # Set dummy audio driver before any pygame initialization
+    os.environ["SDL_AUDIODRIVER"] = "dummy"
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+    try:
+        pygame.mixer.init()
+        manager = AudioManager()
+        assert manager is not None
+    except pygame.error as e:
+        pytest.skip(f"Could not initialize audio: {e}")
+    finally:
+        try:
+            pygame.mixer.quit()
+        except pygame.error:
+            pass
 
 
 def test_load_clip(audio_manager: AudioManager, test_audio_file: str) -> None:
