@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "retro-game-engine"
-version = "0.2.0"
+version = "0.2.1"
 description = "A retro-style game engine built with Pygame"
 authors = ["Ahmed Mohamed <ahmedmohmaed200354@gmail.com>"]
 license = "MIT"
