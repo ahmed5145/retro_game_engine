@@ -33,6 +33,14 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y python3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libasound2-dev
 
+    - name: Configure Poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
+
+    - name: Update Poetry lock file
+      run: poetry lock --no-update
+
     - name: Install dependencies
       run: poetry install
 
