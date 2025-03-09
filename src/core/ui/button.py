@@ -47,16 +47,26 @@ class Button(UIElement):
             x=style.padding[0],
             y=style.padding[1],
             width=rect.width - style.padding[0] - style.padding[2],
-            height=rect.height - style.padding[1] - style.padding[3]
+            height=rect.height - style.padding[1] - style.padding[3],
         )
         self.text_element = Text(text, text_rect)
         self.text_element.parent = self
         self.style = style
         self._hovered = False
         self._pressed = False
-        self.on_click: Optional[Callable[[], None]] = None
+        self._on_click: Optional[Callable[[], None]] = None
         self._surface: Optional[pygame.Surface] = None
         self._needs_update = True
+
+    @property
+    def on_click(self) -> Optional[Callable[[], None]]:
+        """Get the click callback."""
+        return self._on_click
+
+    @on_click.setter
+    def on_click(self, callback: Optional[Callable[[], None]]) -> None:
+        """Set the click callback."""
+        self._on_click = callback
 
     def set_text(self, text: str) -> None:
         """Set the button's text.
@@ -96,8 +106,8 @@ class Button(UIElement):
             was_pressed = self._pressed
             self._pressed = False
             if was_pressed and self.contains_point(event.pos):
-                if self.on_click is not None:
-                    self.on_click()
+                if self._on_click is not None:
+                    self._on_click()
             self._needs_update = True
             return was_pressed
 
@@ -178,14 +188,14 @@ class Button(UIElement):
         # Update hover state
         mouse_pos = pygame.mouse.get_pos()
         bounds = self.get_bounds()
-        
+
         # Get the window offset
         window = pygame.display.get_surface()
         if window:
             window_pos = window.get_offset()
             mouse_x = mouse_pos[0] - window_pos[0]
             mouse_y = mouse_pos[1] - window_pos[1]
-            
+
             self._hovered = (
                 bounds.x <= mouse_x <= bounds.x + bounds.width
                 and bounds.y <= mouse_y <= bounds.y + bounds.height
@@ -194,8 +204,8 @@ class Button(UIElement):
         # Handle click
         if self._hovered and self._pressed and not pygame.mouse.get_pressed()[0]:
             self._pressed = False
-            if self.on_click:
-                self.on_click()
+            if self._on_click is not None:
+                self._on_click()
         elif self._hovered and pygame.mouse.get_pressed()[0]:
             self._pressed = True
         elif not pygame.mouse.get_pressed()[0]:
