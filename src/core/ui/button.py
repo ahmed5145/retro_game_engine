@@ -5,7 +5,7 @@ from typing import Callable, Optional, Tuple, cast
 import pygame
 
 from src.core.ui.text import Text
-from src.core.ui.ui_element import UIElement, UIElementConfig
+from src.core.ui.ui_element import UIElement, UIRect
 
 
 @dataclass
@@ -34,7 +34,7 @@ class ButtonStyle:
 class Button(UIElement):
     """Interactive button UI element with text and click handling."""
 
-    def __init__(self, text: str, rect: UIElementConfig, style: ButtonStyle) -> None:
+    def __init__(self, text: str, rect: UIRect, style: ButtonStyle) -> None:
         """Initialize the button.
 
         Args:
@@ -43,7 +43,12 @@ class Button(UIElement):
             style: Visual style configuration
         """
         super().__init__(rect)
-        text_rect = UIElementConfig(x=0, y=0, width=rect.width, height=rect.height)
+        text_rect = UIRect(
+            x=style.padding[0],
+            y=style.padding[1],
+            width=rect.width - style.padding[0] - style.padding[2],
+            height=rect.height - style.padding[1] - style.padding[3]
+        )
         self.text_element = Text(text, text_rect)
         self.text_element.parent = self
         self.style = style
@@ -173,10 +178,18 @@ class Button(UIElement):
         # Update hover state
         mouse_pos = pygame.mouse.get_pos()
         bounds = self.get_bounds()
-        self._hovered = (
-            bounds.x <= mouse_pos[0] <= bounds.x + bounds.width
-            and bounds.y <= mouse_pos[1] <= bounds.y + bounds.height
-        )
+        
+        # Get the window offset
+        window = pygame.display.get_surface()
+        if window:
+            window_pos = window.get_offset()
+            mouse_x = mouse_pos[0] - window_pos[0]
+            mouse_y = mouse_pos[1] - window_pos[1]
+            
+            self._hovered = (
+                bounds.x <= mouse_x <= bounds.x + bounds.width
+                and bounds.y <= mouse_y <= bounds.y + bounds.height
+            )
 
         # Handle click
         if self._hovered and self._pressed and not pygame.mouse.get_pressed()[0]:
