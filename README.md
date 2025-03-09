@@ -9,7 +9,7 @@
 A modern Python game development framework for creating authentic 8-bit and 16-bit style games. Built with performance and developer experience in mind, it provides a robust set of tools while maintaining the aesthetic and technical constraints that defined the retro gaming era.
 
 <p align="center">
-  <img src="docs/assets/logo.png" alt="Retro Game Engine Logo" width="200"/>
+  <img src="docs/images/logo.svg" alt="Retro Game Engine Logo" width="200"/>
 </p>
 
 ## ✨ Features
@@ -110,7 +110,6 @@ poetry run pytest
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🙏 Acknowledgments
 
 - Built with [Pygame](https://www.pygame.org/)
