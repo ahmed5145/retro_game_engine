@@ -59,5 +59,16 @@ nav:
   - Guides:
     - FAQ: guides/faq.md
     - Migration: guides/migration.md
+    - Best Practices: guides/best-practices.md
+    - Performance: guides/performance.md
+    - Troubleshooting: guides/troubleshooting.md
   - API Reference:
     - Overview: api/index.md
+    - Core:
+      - Game Loop: api/game_loop.md
+      - Input: api/input.md
+      - Window: api/window.md
+      - Vector2D: api/vector2d.md
+    - Graphics:
+      - Sprite: api/sprite.md
+      - Sprite Renderer: api/sprite_renderer.md
