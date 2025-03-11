@@ -1,65 +1,63 @@
 site_name: Retro Game Engine
-site_description: A modern Python game development framework for retro-style games
+site_description: A retro-style game engine built with Pygame
 repo_url: https://github.com/ahmed5145/retro_game_engine
+repo_name: ahmed5145/retro_game_engine
+
 theme:
   name: material
-  palette:
-    primary: indigo
-    accent: deep purple
   features:
     - navigation.tabs
     - navigation.sections
     - navigation.expand
-    - search.suggest
     - search.highlight
-
-nav:
-  - Home: index.md
-  - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quickstart.md
-    - First Game: getting-started/first-game.md
-  - Tutorials:
-    - Basic Game Loop: tutorials/basic-game-loop.md
-    - Sprite Animation: tutorials/sprite-animation.md
-    - Collision Detection: tutorials/collision-detection.md
-    - Input Handling: tutorials/input-handling.md
-  - Core Systems:
-    - Game Loop: api/game_loop.md
-    - Window: api/window.md
-    - Sprite System: api/sprite.md
-    - Input System: api/input.md
-    - Physics: api/physics.md
-    - Audio: api/audio.md
-  - Advanced Features:
-    - Entity Component System: advanced/ecs.md
-    - Scene Management: advanced/scenes.md
-    - UI System: advanced/ui.md
-    - Tilemap System: advanced/tilemap.md
-  - Examples:
-    - Overview: examples/index.md
-    - Platformer: examples/platformer.md
-    - Sprite Test: examples/sprite-test.md
-    - Audio Demo: examples/audio-demo.md
-  - Development:
-    - Contributing: development/contributing.md
-    - Architecture: development/architecture.md
-    - Testing: development/testing.md
-    - Release Process: development/releasing.md
-
-markdown_extensions:
-  - admonition
-  - codehilite
-  - pymdownx.highlight
-  - pymdownx.superfences
-  - pymdownx.tabbed
-  - pymdownx.details
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 
 plugins:
   - search
   - mkdocstrings:
+      default_handler: python
       handlers:
         python:
-          setup_commands:
-            - import sys
-            - sys.path.append(".")
+          paths: [src]
+          options:
+            show_source: true
+            show_root_heading: true
+  - autorefs
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Tutorials:
+    - Overview: tutorials/README.md
+    - Platformer: tutorials/platformer.md
+  - Guides:
+    - FAQ: guides/faq.md
+    - Migration: guides/migration.md
+  - API Reference:
+    - Overview: api/index.md
