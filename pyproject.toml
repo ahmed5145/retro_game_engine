@@ -9,7 +9,7 @@ repository = "https://github.com/ahmed5145/retro_game_engine"
 documentation = "https://retro-game-engine.readthedocs.io"
 keywords = ["game", "engine", "pygame", "retro", "2d"]
 packages = [
-    { include = "src" },
+    { include = "src", from = "." },
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -38,6 +38,16 @@ isort = "^5.12.0"
 mypy = "^1.5.1"
 pylint = "^3.0.3"
 pre-commit = "^3.4.0"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.5.3"
+mkdocs-material = "^9.5.3"
+mkdocstrings = "^0.24.0"
+mkdocstrings-python = "^1.7.5"
+pymdown-extensions = "^10.7"
 
 [build-system]
 requires = ["poetry-core"]
@@ -77,3 +87,11 @@ disable = [
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "--cov=src --cov-report=term-missing"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/ahmed5145/retro_game_engine/issues"
+"Documentation" = "https://retro-game-engine.readthedocs.io"
+"Source Code" = "https://github.com/ahmed5145/retro_game_engine"
+
+[tool.poetry.scripts]
+retro-game = "src.cli:main"

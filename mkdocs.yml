@@ -1,0 +1,65 @@
+site_name: Retro Game Engine
+site_description: A modern Python game development framework for retro-style games
+repo_url: https://github.com/ahmed5145/retro_game_engine
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: deep purple
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - First Game: getting-started/first-game.md
+  - Tutorials:
+    - Basic Game Loop: tutorials/basic-game-loop.md
+    - Sprite Animation: tutorials/sprite-animation.md
+    - Collision Detection: tutorials/collision-detection.md
+    - Input Handling: tutorials/input-handling.md
+  - Core Systems:
+    - Game Loop: api/game_loop.md
+    - Window: api/window.md
+    - Sprite System: api/sprite.md
+    - Input System: api/input.md
+    - Physics: api/physics.md
+    - Audio: api/audio.md
+  - Advanced Features:
+    - Entity Component System: advanced/ecs.md
+    - Scene Management: advanced/scenes.md
+    - UI System: advanced/ui.md
+    - Tilemap System: advanced/tilemap.md
+  - Examples:
+    - Overview: examples/index.md
+    - Platformer: examples/platformer.md
+    - Sprite Test: examples/sprite-test.md
+    - Audio Demo: examples/audio-demo.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Architecture: development/architecture.md
+    - Testing: development/testing.md
+    - Release Process: development/releasing.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.details
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - sys.path.append(".")

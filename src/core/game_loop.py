@@ -50,11 +50,7 @@ class PerformanceMetrics:
 
 
 class GameLoop:
-    """Manages the game loop with fixed and variable timestep updates.
-
-    The game loop handles timing, updates, and rendering with support for both
-    fixed timestep physics/logic updates and variable timestep rendering.
-    """
+    """Manages the game loop with fixed and variable timestep updates."""
 
     def __init__(
         self,
@@ -62,13 +58,7 @@ class GameLoop:
         render_func: Callable[[], None],
         config: Optional[GameLoopConfig] = None,
     ) -> None:
-        """Initialize the game loop.
-
-        Args:
-            update_func: Function to call for game updates
-            render_func: Function to call for rendering
-            config: Optional configuration (default: None)
-        """
+        """Initialize the game loop."""
         self.update_func = update_func
         self.render_func = render_func
         self.config = config or GameLoopConfig()
@@ -78,27 +68,9 @@ class GameLoop:
         self.delta_time = 0.0
         self.physics_accumulator = 0.0
         self._frame_times: List[float] = []
-        self._accumulator: float = 0.0
         self._last_time: float = time.perf_counter()
         self._metrics = PerformanceMetrics()
         self._timing_stack: List[Tuple[str, float]] = []
-        self._clock = pygame.time.Clock()
-
-    def run(self) -> None:
-        """Run the game loop continuously."""
-        self.start()
-        try:
-            while self.running:
-                self._process_frame()
-                # Sleep to maintain target frame rate
-                target_frame_time = 1.0 / self.config.fps
-                current_time = time.perf_counter()
-                frame_time = current_time - self._last_time
-                sleep_time = max(0.0, target_frame_time - frame_time)
-                if sleep_time > 0:
-                    time.sleep(sleep_time)
-        except KeyboardInterrupt:
-            self.stop()
 
     def start(self) -> None:
         """Start the game loop."""
@@ -108,7 +80,6 @@ class GameLoop:
         self.delta_time = 0.0
         self.physics_accumulator = 0.0
         self._frame_times = []
-        self._accumulator = 0.0
         self._last_time = time.perf_counter()
         self._metrics = PerformanceMetrics()
 
@@ -116,28 +87,52 @@ class GameLoop:
         """Stop the game loop."""
         self.running = False
 
-    def _process_frame(self) -> None:
+    def run(self) -> None:
+        """Run the game loop continuously."""
+        self.start()
+        try:
+            while self.running:
+                self.run_one_frame()
+        except KeyboardInterrupt:
+            self.stop()
+
+    def run_one_frame(self) -> None:
         """Process a single frame."""
-        # Get frame time
+        frame_start = time.perf_counter()
+        self._process_frame()
+
+        # Calculate sleep time to maintain target FPS
+        frame_time = time.perf_counter() - frame_start
+        target_frame_time = 1.0 / self.config.fps
+        sleep_time = max(0.0, target_frame_time - frame_time)
+
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+            self._metrics.idle_time = sleep_time
+
+    def _process_frame(self) -> None:
+        """Process a single frame of the game loop."""
         current_time = time.perf_counter()
         frame_time = current_time - self._last_time
         self._last_time = current_time
 
-        # Clamp frame time to prevent spiral of death
+        # Clamp frame time
         frame_time = min(frame_time, self.config.max_frame_time)
         self.delta_time = frame_time
         self.total_time += frame_time
         self.frame_count += 1
 
-        # Update physics with fixed time step
+        # Fixed timestep updates
+        self._start_timing("fixed_update_time")
         self.physics_accumulator += frame_time
+        fixed_updates = 0
         while self.physics_accumulator >= self.config.fixed_time_step:
-            self._start_timing("fixed_update_time")
             self.update_func(self.config.fixed_time_step)
-            self._end_timing("fixed_update_time")
             self.physics_accumulator -= self.config.fixed_time_step
+            fixed_updates += 1
+        self._end_timing("fixed_update_time")
 
-        # Variable update
+        # Always do variable timestep update
         self._start_timing("update_time")
         self.update_func(frame_time)
         self._end_timing("update_time")
@@ -153,70 +148,46 @@ class GameLoop:
             self._frame_times.pop(0)
         self._update_metrics()
 
-    @property
-    def average_fps(self) -> float:
-        """Get the average FPS.
+    def _start_timing(self, metric_name: str) -> None:
+        """Start timing a section of the game loop."""
+        start_time = time.perf_counter()
+        self._timing_stack.append((metric_name, start_time))
 
-        Returns:
-            Average frames per second
-        """
-        if self.total_time > 0:
-            return self.frame_count / self.total_time
-        return 0.0
+    def _end_timing(self, metric_name: str) -> None:
+        """End timing a section and update the corresponding metric."""
+        if not self._timing_stack:
+            return
 
-    def _update_timing(self) -> None:
-        """Update timing calculations for this frame."""
-        current_time = time.perf_counter()
-        frame_time = current_time - self._last_time
-        self._last_time = current_time
+        name, start_time = self._timing_stack.pop()
+        if name != metric_name:
+            return
 
-        # Clamp frame time to prevent spiral of death
-        frame_time = min(frame_time, self.config.max_frame_time)
-
-        # Update frame time history
-        self._frame_times.append(frame_time)
-        if len(self._frame_times) > self.config.fps_sample_size:
-            self._frame_times.pop(0)
-
-        # Update fixed update accumulator
-        self._accumulator += frame_time
+        duration = time.perf_counter() - start_time
+        # Use exponential moving average for smoother metrics
+        alpha = 0.2  # Smoothing factor
+        current_value = getattr(self._metrics, metric_name)
+        new_value = (alpha * duration) + ((1 - alpha) * current_value)
+        setattr(self._metrics, metric_name, new_value)
 
     def _update_metrics(self) -> None:
         """Update performance metrics."""
-        if self._frame_times:
-            self._metrics.frame_time = self._frame_times[-1]
-            self._metrics.min_frame_time = min(self._frame_times)
-            self._metrics.max_frame_time = max(self._frame_times)
-            self._metrics.avg_frame_time = sum(self._frame_times) / len(
-                self._frame_times
-            )
-            self._metrics.fps = 1.0 / self._metrics.avg_frame_time
+        if not self._frame_times:
+            return
 
-    def _start_timing(self, metric_name: str) -> None:
-        """Start timing a section of the game loop."""
-        self._last_time = time.perf_counter()
-        self._timing_stack.append((metric_name, self._last_time))
+        current_frame_time = self._frame_times[-1]
+        self._metrics.frame_time = current_frame_time
+        self._metrics.min_frame_time = min(self._frame_times)
+        self._metrics.max_frame_time = max(self._frame_times)
+        self._metrics.avg_frame_time = sum(self._frame_times) / len(self._frame_times)
+        self._metrics.fps = (
+            1.0 / self._metrics.avg_frame_time
+            if self._metrics.avg_frame_time > 0
+            else 0.0
+        )
 
-    def _end_timing(self, metric_name: str) -> None:
-        """End timing a section and update the corresponding metric.
-
-        Args:
-            metric_name: Name of the metric to update
-        """
-        duration = time.perf_counter() - self._last_time
-        setattr(self._metrics, metric_name, duration)
-        self._timing_stack.pop()
-
-    def _process_fixed_updates(self) -> None:
-        """Process fixed timestep updates."""
-        self._start_timing("fixed_update_time")
-        while self._accumulator >= self.config.fixed_time_step:
-            self.update_func(self.config.fixed_time_step)
-            self._accumulator -= self.config.fixed_time_step
-        self._end_timing("fixed_update_time")
-
-    def run_one_frame(self) -> None:
-        """Run a single frame of the game loop."""
-        if not self.running:
-            self.start()
-        self._process_frame()
+    @property
+    def average_fps(self) -> float:
+        """Get the average FPS."""
+        if self.total_time > 0:
+            return self.frame_count / self.total_time
+        return 0.0
