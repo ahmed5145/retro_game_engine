@@ -1,0 +1,1735 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A retro-style game engine built with Pygame">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+    
+    
+      
+        <title>Core API Reference - Retro Game Engine</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#core-api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Retro Game Engine" class="md-header__button md-logo" aria-label="Retro Game Engine" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Retro Game Engine
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Core API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ahmed5145/retro_game_engine" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ahmed5145/retro_game_engine
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/faq/" class="md-tabs__link">
+          
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Retro Game Engine" class="md-nav__button md-logo" aria-label="Retro Game Engine" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Retro Game Engine
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ahmed5145/retro_game_engine" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ahmed5145/retro_game_engine
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/platformer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Platformer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/migration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/best-practices/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Best Practices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/performance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Performance
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Core
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Core
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../game_loop/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Game Loop
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../input/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Input
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../window/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Window
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vector2d/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Vector2D
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Graphics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            Graphics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprite/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sprite
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprite_renderer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sprite Renderer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#gameloop" class="md-nav__link">
+    <span class="md-ellipsis">
+      GameLoop
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GameLoop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__self-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__(self) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runself-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      run(self) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stopself-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      stop(self) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change_sceneself-scene-scene-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      change_scene(self, scene: Scene) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scene" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scene
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scene">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#methods_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__self-none_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__(self) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updateself-delta_time-float-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      update(self, delta_time: float) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drawself-surface-pygamesurface-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      draw(self, surface: pygame.Surface) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on_enterself-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      on_enter(self) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on_exitself-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      on_exit(self) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sprite" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sprite
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sprite">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#properties_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__self-texture_path-str-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__(self, texture_path: str) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drawself-surface-pygamesurface-none_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      draw(self, surface: pygame.Surface) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updateself-delta_time-float-none_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      update(self, delta_time: float) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_frameself-frame-spriteframe-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      add_frame(self, frame: SpriteFrame) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#play_animationself-speed-float-10-loop-bool-true-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      play_animation(self, speed: float = 1.0, loop: bool = True) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#input" class="md-nav__link">
+    <span class="md-ellipsis">
+      Input
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Input">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#methods_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#staticmethod-is_key_pressedkey-int-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      @staticmethod is_key_pressed(key: int) -&gt; bool
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticmethod-is_mouse_button_pressedbutton-int-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      @staticmethod is_mouse_button_pressed(button: int) -&gt; bool
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticmethod-get_mouse_position-tupleint-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      @staticmethod get_mouse_position() -&gt; Tuple[int, int]
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#physics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Physics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Physics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#methods_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#staticmethod-check_collisionsprite1-sprite-sprite2-sprite-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      @staticmethod check_collision(sprite1: Sprite, sprite2: Sprite) -&gt; bool
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticmethod-apply_gravitysprite-sprite-gravity-float-delta_time-float-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      @staticmethod apply_gravity(sprite: Sprite, gravity: float, delta_time: float) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Audio
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Audio">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#methods_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#staticmethod-play_soundsound_path-str-volume-float-10-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      @staticmethod play_sound(sound_path: str, volume: float = 1.0) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticmethod-play_musicmusic_path-str-volume-float-10-loop-bool-true-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      @staticmethod play_music(music_path: str, volume: float = 1.0, loop: bool = True) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticmethod-stop_music-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      @staticmethod stop_music() -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      UI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#button" class="md-nav__link">
+    <span class="md-ellipsis">
+      Button
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Button">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#properties_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__self-text-str-position-tupleint-int-size-tupleint-int-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__(self, text: str, position: Tuple[int, int], size: Tuple[int, int]) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updateself-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      update(self) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drawself-surface-pygamesurface-none_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      draw(self, surface: pygame.Surface) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on_clickself-callback-callable-none-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      on_click(self, callback: Callable[[], None]) -&gt; None
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="core-api-reference">Core API Reference<a class="headerlink" href="#core-api-reference" title="Permanent link">&para;</a></h1>
+<h2 id="gameloop">GameLoop<a class="headerlink" href="#gameloop" title="Permanent link">&para;</a></h2>
+<p>The main game loop class that manages the game's execution.</p>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>window_title</td>
+<td>str</td>
+<td>The title of the game window</td>
+</tr>
+<tr>
+<td>window_width</td>
+<td>int</td>
+<td>The width of the game window in pixels</td>
+</tr>
+<tr>
+<td>window_height</td>
+<td>int</td>
+<td>The height of the game window in pixels</td>
+</tr>
+<tr>
+<td>current_scene</td>
+<td>Scene</td>
+<td>The currently active scene</td>
+</tr>
+<tr>
+<td>target_fps</td>
+<td>int</td>
+<td>Target frames per second (default: 60)</td>
+</tr>
+<tr>
+<td>is_running</td>
+<td>bool</td>
+<td>Whether the game loop is running</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
+<h4 id="__init__self-none"><code>__init__(self) -&gt; None</code><a class="headerlink" href="#__init__self-none" title="Permanent link">&para;</a></h4>
+<p>Initializes a new game loop instance.</p>
+<h4 id="runself-none"><code>run(self) -&gt; None</code><a class="headerlink" href="#runself-none" title="Permanent link">&para;</a></h4>
+<p>Starts the game loop. This method blocks until the game is closed.</p>
+<h4 id="stopself-none"><code>stop(self) -&gt; None</code><a class="headerlink" href="#stopself-none" title="Permanent link">&para;</a></h4>
+<p>Stops the game loop.</p>
+<h4 id="change_sceneself-scene-scene-none"><code>change_scene(self, scene: Scene) -&gt; None</code><a class="headerlink" href="#change_sceneself-scene-scene-none" title="Permanent link">&para;</a></h4>
+<p>Changes the current scene to the specified scene.</p>
+<h2 id="scene">Scene<a class="headerlink" href="#scene" title="Permanent link">&para;</a></h2>
+<p>Base class for game scenes.</p>
+<h3 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h3>
+<h4 id="__init__self-none_1"><code>__init__(self) -&gt; None</code><a class="headerlink" href="#__init__self-none_1" title="Permanent link">&para;</a></h4>
+<p>Initializes a new scene instance.</p>
+<h4 id="updateself-delta_time-float-none"><code>update(self, delta_time: float) -&gt; None</code><a class="headerlink" href="#updateself-delta_time-float-none" title="Permanent link">&para;</a></h4>
+<p>Updates the scene's logic. Called every frame.</p>
+<p>Parameters:
+- <code>delta_time</code>: Time elapsed since last frame in seconds</p>
+<h4 id="drawself-surface-pygamesurface-none"><code>draw(self, surface: pygame.Surface) -&gt; None</code><a class="headerlink" href="#drawself-surface-pygamesurface-none" title="Permanent link">&para;</a></h4>
+<p>Draws the scene. Called every frame after update.</p>
+<p>Parameters:
+- <code>surface</code>: The surface to draw on</p>
+<h4 id="on_enterself-none"><code>on_enter(self) -&gt; None</code><a class="headerlink" href="#on_enterself-none" title="Permanent link">&para;</a></h4>
+<p>Called when the scene becomes active.</p>
+<h4 id="on_exitself-none"><code>on_exit(self) -&gt; None</code><a class="headerlink" href="#on_exitself-none" title="Permanent link">&para;</a></h4>
+<p>Called when the scene is being exited.</p>
+<h2 id="sprite">Sprite<a class="headerlink" href="#sprite" title="Permanent link">&para;</a></h2>
+<p>Class for handling sprite rendering and animation.</p>
+<h3 id="properties_1">Properties<a class="headerlink" href="#properties_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>config</td>
+<td>SpriteConfig</td>
+<td>Configuration for position, scale, rotation, etc.</td>
+</tr>
+<tr>
+<td>texture</td>
+<td>pygame.Surface</td>
+<td>The sprite's texture</td>
+</tr>
+<tr>
+<td>frames</td>
+<td>List[SpriteFrame]</td>
+<td>List of animation frames</td>
+</tr>
+<tr>
+<td>current_frame</td>
+<td>int</td>
+<td>Index of current animation frame</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods_2">Methods<a class="headerlink" href="#methods_2" title="Permanent link">&para;</a></h3>
+<h4 id="__init__self-texture_path-str-none"><code>__init__(self, texture_path: str) -&gt; None</code><a class="headerlink" href="#__init__self-texture_path-str-none" title="Permanent link">&para;</a></h4>
+<p>Initializes a new sprite instance.</p>
+<p>Parameters:
+- <code>texture_path</code>: Path to the sprite's texture file</p>
+<h4 id="drawself-surface-pygamesurface-none_1"><code>draw(self, surface: pygame.Surface) -&gt; None</code><a class="headerlink" href="#drawself-surface-pygamesurface-none_1" title="Permanent link">&para;</a></h4>
+<p>Draws the sprite on the given surface.</p>
+<p>Parameters:
+- <code>surface</code>: The surface to draw on</p>
+<h4 id="updateself-delta_time-float-none_1"><code>update(self, delta_time: float) -&gt; None</code><a class="headerlink" href="#updateself-delta_time-float-none_1" title="Permanent link">&para;</a></h4>
+<p>Updates the sprite's animation state.</p>
+<p>Parameters:
+- <code>delta_time</code>: Time elapsed since last frame in seconds</p>
+<h4 id="add_frameself-frame-spriteframe-none"><code>add_frame(self, frame: SpriteFrame) -&gt; None</code><a class="headerlink" href="#add_frameself-frame-spriteframe-none" title="Permanent link">&para;</a></h4>
+<p>Adds an animation frame to the sprite.</p>
+<p>Parameters:
+- <code>frame</code>: The frame to add</p>
+<h4 id="play_animationself-speed-float-10-loop-bool-true-none"><code>play_animation(self, speed: float = 1.0, loop: bool = True) -&gt; None</code><a class="headerlink" href="#play_animationself-speed-float-10-loop-bool-true-none" title="Permanent link">&para;</a></h4>
+<p>Starts playing the sprite's animation.</p>
+<p>Parameters:
+- <code>speed</code>: Animation playback speed multiplier
+- <code>loop</code>: Whether to loop the animation</p>
+<h2 id="input">Input<a class="headerlink" href="#input" title="Permanent link">&para;</a></h2>
+<p>Static class for handling input.</p>
+<h3 id="methods_3">Methods<a class="headerlink" href="#methods_3" title="Permanent link">&para;</a></h3>
+<h4 id="staticmethod-is_key_pressedkey-int-bool"><code>@staticmethod is_key_pressed(key: int) -&gt; bool</code><a class="headerlink" href="#staticmethod-is_key_pressedkey-int-bool" title="Permanent link">&para;</a></h4>
+<p>Checks if a key is currently pressed.</p>
+<p>Parameters:
+- <code>key</code>: Pygame key constant</p>
+<p>Returns:
+- <code>bool</code>: True if the key is pressed</p>
+<h4 id="staticmethod-is_mouse_button_pressedbutton-int-bool"><code>@staticmethod is_mouse_button_pressed(button: int) -&gt; bool</code><a class="headerlink" href="#staticmethod-is_mouse_button_pressedbutton-int-bool" title="Permanent link">&para;</a></h4>
+<p>Checks if a mouse button is currently pressed.</p>
+<p>Parameters:
+- <code>button</code>: Mouse button index (1: left, 2: middle, 3: right)</p>
+<p>Returns:
+- <code>bool</code>: True if the button is pressed</p>
+<h4 id="staticmethod-get_mouse_position-tupleint-int"><code>@staticmethod get_mouse_position() -&gt; Tuple[int, int]</code><a class="headerlink" href="#staticmethod-get_mouse_position-tupleint-int" title="Permanent link">&para;</a></h4>
+<p>Gets the current mouse position.</p>
+<p>Returns:
+- <code>Tuple[int, int]</code>: (x, y) coordinates</p>
+<h2 id="physics">Physics<a class="headerlink" href="#physics" title="Permanent link">&para;</a></h2>
+<p>Class for handling physics calculations.</p>
+<h3 id="methods_4">Methods<a class="headerlink" href="#methods_4" title="Permanent link">&para;</a></h3>
+<h4 id="staticmethod-check_collisionsprite1-sprite-sprite2-sprite-bool"><code>@staticmethod check_collision(sprite1: Sprite, sprite2: Sprite) -&gt; bool</code><a class="headerlink" href="#staticmethod-check_collisionsprite1-sprite-sprite2-sprite-bool" title="Permanent link">&para;</a></h4>
+<p>Checks for collision between two sprites.</p>
+<p>Parameters:
+- <code>sprite1</code>: First sprite
+- <code>sprite2</code>: Second sprite</p>
+<p>Returns:
+- <code>bool</code>: True if sprites are colliding</p>
+<h4 id="staticmethod-apply_gravitysprite-sprite-gravity-float-delta_time-float-none"><code>@staticmethod apply_gravity(sprite: Sprite, gravity: float, delta_time: float) -&gt; None</code><a class="headerlink" href="#staticmethod-apply_gravitysprite-sprite-gravity-float-delta_time-float-none" title="Permanent link">&para;</a></h4>
+<p>Applies gravity to a sprite.</p>
+<p>Parameters:
+- <code>sprite</code>: The sprite to apply gravity to
+- <code>gravity</code>: Gravity strength
+- <code>delta_time</code>: Time elapsed since last frame</p>
+<h2 id="audio">Audio<a class="headerlink" href="#audio" title="Permanent link">&para;</a></h2>
+<p>Class for handling audio playback.</p>
+<h3 id="methods_5">Methods<a class="headerlink" href="#methods_5" title="Permanent link">&para;</a></h3>
+<h4 id="staticmethod-play_soundsound_path-str-volume-float-10-none"><code>@staticmethod play_sound(sound_path: str, volume: float = 1.0) -&gt; None</code><a class="headerlink" href="#staticmethod-play_soundsound_path-str-volume-float-10-none" title="Permanent link">&para;</a></h4>
+<p>Plays a sound effect.</p>
+<p>Parameters:
+- <code>sound_path</code>: Path to the sound file
+- <code>volume</code>: Volume level (0.0 to 1.0)</p>
+<h4 id="staticmethod-play_musicmusic_path-str-volume-float-10-loop-bool-true-none"><code>@staticmethod play_music(music_path: str, volume: float = 1.0, loop: bool = True) -&gt; None</code><a class="headerlink" href="#staticmethod-play_musicmusic_path-str-volume-float-10-loop-bool-true-none" title="Permanent link">&para;</a></h4>
+<p>Plays background music.</p>
+<p>Parameters:
+- <code>music_path</code>: Path to the music file
+- <code>volume</code>: Volume level (0.0 to 1.0)
+- <code>loop</code>: Whether to loop the music</p>
+<h4 id="staticmethod-stop_music-none"><code>@staticmethod stop_music() -&gt; None</code><a class="headerlink" href="#staticmethod-stop_music-none" title="Permanent link">&para;</a></h4>
+<p>Stops currently playing music.</p>
+<h2 id="ui">UI<a class="headerlink" href="#ui" title="Permanent link">&para;</a></h2>
+<h3 id="button">Button<a class="headerlink" href="#button" title="Permanent link">&para;</a></h3>
+<p>Class for creating interactive buttons.</p>
+<h4 id="properties_2">Properties<a class="headerlink" href="#properties_2" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>text</td>
+<td>str</td>
+<td>The button's text</td>
+</tr>
+<tr>
+<td>position</td>
+<td>Tuple[int, int]</td>
+<td>Button position (x, y)</td>
+</tr>
+<tr>
+<td>size</td>
+<td>Tuple[int, int]</td>
+<td>Button size (width, height)</td>
+</tr>
+<tr>
+<td>is_hovered</td>
+<td>bool</td>
+<td>Whether the mouse is hovering over the button</td>
+</tr>
+<tr>
+<td>is_pressed</td>
+<td>bool</td>
+<td>Whether the button is being pressed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="methods_6">Methods<a class="headerlink" href="#methods_6" title="Permanent link">&para;</a></h4>
+<h5 id="__init__self-text-str-position-tupleint-int-size-tupleint-int-none"><code>__init__(self, text: str, position: Tuple[int, int], size: Tuple[int, int]) -&gt; None</code><a class="headerlink" href="#__init__self-text-str-position-tupleint-int-size-tupleint-int-none" title="Permanent link">&para;</a></h5>
+<p>Initializes a new button instance.</p>
+<h5 id="updateself-none"><code>update(self) -&gt; None</code><a class="headerlink" href="#updateself-none" title="Permanent link">&para;</a></h5>
+<p>Updates the button's state based on input.</p>
+<h5 id="drawself-surface-pygamesurface-none_2"><code>draw(self, surface: pygame.Surface) -&gt; None</code><a class="headerlink" href="#drawself-surface-pygamesurface-none_2" title="Permanent link">&para;</a></h5>
+<p>Draws the button on the given surface.</p>
+<h5 id="on_clickself-callback-callable-none-none"><code>on_click(self, callback: Callable[[], None]) -&gt; None</code><a class="headerlink" href="#on_clickself-callback-callable-none-none" title="Permanent link">&para;</a></h5>
+<p>Sets the button's click callback function.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.highlight"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      
+    
+  </body>
+</html>
